@@ -7,6 +7,7 @@
 <meta name="description" content="VenuZ is the app for saving, planning, and discovering places worth going. Restaurants, bars, spas, beaches, markets — all in one place.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ─── RESET ─── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -414,7 +415,22 @@ footer{
 }
 .footer-social a:hover{color:var(--terracotta)}
 
-/* ─── MOBILE ─── */
+/* ─── MOBILE PILLS — tablets & large phones ─── */
+@media(max-width:900px){
+  .pill{font-size:8px;padding:4px 10px}
+  /* Top strip: pills hug top edge, alternating left/right */
+  .pill:nth-child(1){top:8%;left:0;right:auto;bottom:auto}
+  .pill:nth-child(2){top:8%;right:0;left:auto;bottom:auto}
+  .pill:nth-child(3){top:14%;left:0;right:auto;bottom:auto}
+  .pill:nth-child(4){top:14%;right:0;left:auto;bottom:auto}
+  /* Bottom strip: pills hug bottom edge */
+  .pill:nth-child(5){bottom:7%;left:0;right:auto;top:auto}
+  .pill:nth-child(6){bottom:7%;right:0;left:auto;top:auto}
+  .pill:nth-child(7){bottom:13%;left:0;right:auto;top:auto}
+  .pill:nth-child(8){bottom:13%;right:0;left:auto;top:auto}
+}
+
+/* ─── MOBILE — small phones ─── */
 @media(max-width:600px){
   nav{padding:16px 20px}
   .hero{padding:100px 20px 60px}
@@ -424,6 +440,12 @@ footer{
   .footer-links,.footer-social{justify-content:center}
   .step{flex-direction:column;gap:8px}
   .step-num{font-size:32px}
+}
+
+/* ─── MOBILE PILLS — tiny phones (under 360px) ─── */
+@media(max-width:360px){
+  .pill:nth-child(3),.pill:nth-child(4),
+  .pill:nth-child(7),.pill:nth-child(8){display:none}
 }
 </style>
 </head>
@@ -456,8 +478,8 @@ footer{
   <div class="hero-title-sub">saved.</div>
 
   <p class="hero-tagline">
-    VenuZ is the app for saving and discovering places worth going —
-    restaurants, bars, spas, beaches, markets, hotels, hookah lounges,
+    VenuZ is the app for saving and discovering places worth going:
+    Restaurants, Bars, Spas, Beaches, Markets, Hotels, Lounges
     and anywhere else life takes you.
   </p>
 
@@ -595,7 +617,7 @@ footer{
           <li>Vibe tags on every save</li>
           <li>Wishlist & visited tracker</li>
           <li>Friends feed</li>
-          <li>Up to 50 saved places</li>
+          <li>Up to 25 saved places</li>
         </ul>
       </div>
 
@@ -638,7 +660,7 @@ footer{
   <p class="footer-cta-sub">Stop losing them in your DMs. Start your wishlist.</p>
 
   <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-    <div class="waitlist-form" style="opacity:1;animation:none;max-width:380px">
+    <div id="form-container-2" class="waitlist-form" style="opacity:1;animation:none;max-width:380px">
       <input
         class="waitlist-input"
         type="email"
@@ -648,6 +670,9 @@ footer{
       />
       <button class="waitlist-btn" onclick="joinWaitlist2()">Join Waitlist</button>
     </div>
+    <div class="waitlist-success" id="success-msg-2">
+      ✦ &nbsp; You're on the list. We'll be in touch soon.
+    </div>
     <p style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.5px">Launching in New York City & Accra, Ghana</p>
   </div>
 </section>
@@ -656,7 +681,7 @@ footer{
 <footer>
   <div class="footer-logo">V<span>e</span>nuZ</div>
   <div class="footer-links">
-    <a href="#">Privacy</a>
+    <a href="privacy.html">Privacy</a>
     <a href="#">Terms</a>
     <a href="mailto:hello@venuzapp.com">Contact</a>
   </div>
@@ -668,37 +693,76 @@ footer{
 </footer>
 
 <script>
-// ─── Waitlist form logic ───
-function joinWaitlist() {
-  const email = document.getElementById('email-input').value.trim();
-  if (!validateEmail(email)) {
-    document.getElementById('email-input').style.borderBottom = '1px solid #D85A30';
-    document.getElementById('email-input').placeholder = 'Enter a valid email';
+// ─── Supabase client ───
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+// ─── Shared submit logic ───
+async function submitEmail(email, onSuccess, onError) {
+  const { error } = await _supabase
+    .from('waitlist')
+    .insert([{ email }]);
+
+  if (error) {
+    if (error.code === '23505') {
+      onSuccess(); // duplicate — show success quietly, don't reveal it's already registered
+    } else {
+      onError();
+    }
     return;
   }
-  showSuccess();
-  // TODO: Wire up Mailchimp API key here
-  // fetch('/api/waitlist', { method: 'POST', body: JSON.stringify({ email }) })
-  console.log('Waitlist signup:', email);
+  onSuccess();
 }
 
-function joinWaitlist2() {
-  const email = document.getElementById('email-input-2').value.trim();
-  if (!validateEmail(email)) return;
-  showSuccess();
-  console.log('Waitlist signup:', email);
+// ─── Hero form ───
+async function joinWaitlist() {
+  const input = document.getElementById('email-input');
+  const email = input.value.trim();
+  if (!validateEmail(email)) {
+    input.placeholder = 'Enter a valid email';
+    input.style.borderBottom = '1px solid #D85A30';
+    return;
+  }
+  await submitEmail(
+    email,
+    () => {
+      document.getElementById('form-container').style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+    },
+    () => {
+      input.placeholder = 'Something went wrong — try again';
+    }
+  );
 }
 
-function showSuccess() {
-  document.getElementById('form-container').style.display = 'none';
-  document.getElementById('success-msg').style.display = 'block';
+// ─── Footer form ───
+async function joinWaitlist2() {
+  const input = document.getElementById('email-input-2');
+  const email = input.value.trim();
+  if (!validateEmail(email)) {
+    input.placeholder = 'Enter a valid email';
+    return;
+  }
+  await submitEmail(
+    email,
+    () => {
+      document.getElementById('form-container-2').style.display = 'none';
+      document.getElementById('success-msg-2').style.display = 'block';
+    },
+    () => {
+      input.placeholder = 'Something went wrong — try again';
+    }
+  );
 }
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Allow Enter key to submit
+// Allow Enter key to submit hero form
 document.getElementById('email-input').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') joinWaitlist();
 });

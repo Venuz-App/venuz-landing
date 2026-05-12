@@ -1,0 +1,12 @@
+# System
+.DS_Store
+.claude/
+
+# Local docs (not for public repo)
+*.md
+!README.md
+venuz_developer_handoff.md
+
+# Pitch decks and local artifacts
+*.pptx
+*.pdf
