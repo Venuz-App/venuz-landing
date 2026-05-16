@@ -132,7 +132,7 @@ nav{
 
 /* ─── WAITLIST FORM ─── */
 .waitlist-form{
-  display:flex;flex-direction:column;gap:0;max-width:420px;width:100%;margin:0 auto;
+  display:flex;gap:0;max-width:420px;width:100%;margin:0 auto;
   border-radius:12px;overflow:hidden;
   border:1px solid rgba(255,255,255,0.15);
   background:rgba(255,255,255,0.05);
@@ -144,9 +144,6 @@ nav{
   background:transparent;border:none;outline:none;
   color:var(--warm-white);font-family:'Montserrat',sans-serif;
   font-size:11px;letter-spacing:0.3px;
-}
-.waitlist-divider{
-  height:1px;background:rgba(255,255,255,0.08);margin:0 18px;
 }
 .waitlist-input::placeholder{color:rgba(255,255,255,0.35)}
 .waitlist-btn{
@@ -625,7 +622,8 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
 @media(max-width:600px){
   nav{padding:16px 20px}
   .hero{padding:100px 20px 60px}
-  .waitlist-btn{padding:14px}
+  .waitlist-form{flex-direction:column;border-radius:12px}
+  .waitlist-btn{border-radius:0 0 12px 12px;padding:14px}
   footer{flex-direction:column;text-align:center;padding:20px}
   .footer-links,.footer-social{justify-content:center}
   .step{flex-direction:column;gap:8px}
@@ -672,8 +670,6 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
   <div id="waitlist" style="width:100%;display:flex;flex-direction:column;align-items:center">
     <div class="waitlist-form" id="form-container">
       <input class="waitlist-input" type="email" id="email-input" placeholder="your@email.com" autocomplete="email"/>
-      <div class="waitlist-divider"></div>
-      <input class="waitlist-input" type="text" id="city-input-1" placeholder="Your city (optional)" autocomplete="address-level2"/>
       <button class="waitlist-btn" onclick="joinWaitlist()">Join Waitlist</button>
     </div>
     <div class="waitlist-success" id="success-msg">✦ &nbsp; You're on the list. We'll be in touch soon.</div>
@@ -1012,8 +1008,6 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
   <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
     <div id="form-container-2" class="waitlist-form" style="opacity:1;animation:none;max-width:380px">
       <input class="waitlist-input" type="email" id="email-input-2" placeholder="your@email.com" autocomplete="email"/>
-      <div class="waitlist-divider"></div>
-      <input class="waitlist-input" type="text" id="city-input-2" placeholder="Your city (optional)" autocomplete="address-level2"/>
       <button class="waitlist-btn" onclick="joinWaitlist2()">Join Waitlist</button>
     </div>
     <div class="waitlist-success" id="success-msg-2">✦ &nbsp; You're on the list. We'll be in touch soon.</div>
@@ -1042,18 +1036,16 @@ const _supabase = createClient(
   'https://xjkrplonwfexigkudhmo.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
 );
-async function submitEmail(email, city, onSuccess, onError) {
-  const record = city ? { email, city } : { email };
-  const { error } = await _supabase.from('waitlist').insert([record]);
+async function submitEmail(email, onSuccess, onError) {
+  const { error } = await _supabase.from('waitlist').insert([{ email }]);
   if (error) { if (error.code === '23505') { onSuccess(); } else { onError(); } return; }
   onSuccess();
 }
 async function joinWaitlist() {
   const input = document.getElementById('email-input');
   const email = input.value.trim();
-  const city = document.getElementById('city-input-1').value.trim();
   if (!validateEmail(email)) { input.placeholder = 'Enter a valid email'; input.style.borderBottom = '1px solid #D85A30'; return; }
-  await submitEmail(email, city,
+  await submitEmail(email,
     () => { document.getElementById('form-container').style.display='none'; document.getElementById('success-msg').style.display='block'; },
     () => { input.placeholder = 'Something went wrong — try again'; }
   );
@@ -1061,9 +1053,8 @@ async function joinWaitlist() {
 async function joinWaitlist2() {
   const input = document.getElementById('email-input-2');
   const email = input.value.trim();
-  const city = document.getElementById('city-input-2').value.trim();
   if (!validateEmail(email)) { input.placeholder = 'Enter a valid email'; return; }
-  await submitEmail(email, city,
+  await submitEmail(email,
     () => { document.getElementById('form-container-2').style.display='none'; document.getElementById('success-msg-2').style.display='block'; },
     () => { input.placeholder = 'Something went wrong — try again'; }
   );
