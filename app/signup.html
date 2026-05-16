@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — VenuZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#0F0E0B;
+  --terracotta:#D85A30;
+  --terracotta-light:#F0A882;
+  --warm-white:#FDFBF8;
+  --muted:#9A9488;
+  --border:rgba(255,255,255,0.1);
+}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--charcoal);
+  color:var(--warm-white);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  position:relative;overflow:hidden;
+}
+.glow{
+  position:fixed;width:500px;height:500px;
+  background:radial-gradient(circle,rgba(216,90,48,0.15) 0%,transparent 70%);
+  top:-150px;right:-150px;pointer-events:none;
+}
+
+/* ── card ── */
+.card{
+  width:100%;max-width:400px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:48px 40px;
+  position:relative;z-index:1;
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+  display:block;margin-bottom:36px;
+}
+.logo span{color:var(--terracotta)}
+.card-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;font-weight:300;
+  margin-bottom:8px;line-height:1.2;
+}
+.card-sub{
+  font-size:10px;color:var(--muted);
+  letter-spacing:0.3px;line-height:1.7;
+  margin-bottom:36px;
+}
+
+/* ── form ── */
+.field{margin-bottom:16px}
+.field label{
+  display:block;font-size:9px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.field input{
+  width:100%;padding:14px 16px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:8px;outline:none;
+  color:var(--warm-white);
+  font-family:'Montserrat',sans-serif;
+  font-size:12px;letter-spacing:0.3px;
+  transition:border-color 0.2s;
+}
+.field input:focus{border-color:rgba(216,90,48,0.5)}
+.field input::placeholder{color:rgba(255,255,255,0.2)}
+.field-hint{
+  font-size:9px;color:var(--muted);
+  letter-spacing:0.3px;margin-top:6px;
+}
+
+.btn{
+  width:100%;padding:15px;margin-top:8px;
+  background:var(--terracotta);border:none;
+  border-radius:8px;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.btn:hover{background:#C04E28}
+.btn:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
+
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin:24px 0;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;
+  background:rgba(255,255,255,0.07);
+}
+.divider span{font-size:9px;color:var(--muted);letter-spacing:1px}
+
+.alt-link{
+  text-align:center;font-size:10px;color:var(--muted);
+}
+.alt-link a{color:var(--terracotta-light);text-decoration:none}
+.alt-link a:hover{color:var(--terracotta)}
+
+/* ── states ── */
+.msg{
+  display:none;
+  padding:14px 16px;border-radius:8px;
+  font-size:11px;line-height:1.6;
+  margin-bottom:16px;
+}
+.msg.success{
+  background:rgba(75,165,90,0.1);
+  border:1px solid rgba(75,165,90,0.25);
+  color:#7dd87f;
+}
+.msg.error{
+  background:rgba(216,90,48,0.1);
+  border:1px solid rgba(216,90,48,0.25);
+  color:var(--terracotta-light);
+}
+
+/* ── check screen ── */
+.check-screen{
+  display:none;text-align:center;
+}
+.check-icon{
+  font-size:48px;margin-bottom:24px;
+}
+.check-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:300;margin-bottom:12px;
+}
+.check-sub{
+  font-size:11px;color:var(--muted);line-height:1.8;
+}
+
+@media(max-width:480px){
+  .card{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="card">
+  <a href="../index.html" class="logo">V<span>e</span>nuZ</a>
+
+  <!-- Sign up form -->
+  <div id="signup-form">
+    <div class="card-title">Create your account</div>
+    <p class="card-sub">Join VenuZ and start saving the places worth going.</p>
+
+    <div class="msg" id="error-msg"></div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="your@email.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Invite Code <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="invite-code" placeholder="VENUZ-BETA" autocomplete="off" style="text-transform:uppercase"/>
+      <div class="field-hint">Have an invite code? Enter it for beta access.</div>
+    </div>
+
+    <button class="btn" id="signup-btn" onclick="handleSignup()">Continue with Email</button>
+
+    <div class="divider"><span>or</span></div>
+    <div class="alt-link">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+
+  <!-- Check email screen -->
+  <div class="check-screen" id="check-screen">
+    <div class="check-icon">✉️</div>
+    <div class="check-title">Check your email</div>
+    <p class="check-sub">We sent a magic link to <strong id="sent-to"></strong>.<br><br>Click it to finish signing up — no password needed.</p>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+const BETA_CODE = 'VENUZ-BETA';
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.className = 'msg error';
+  el.style.display = 'block';
+}
+
+async function handleSignup() {
+  const email = document.getElementById('email').value.trim();
+  const code = document.getElementById('invite-code').value.trim().toUpperCase();
+  const btn = document.getElementById('signup-btn');
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('Please enter a valid email address.'); return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const role = code === BETA_CODE ? 'beta' : 'user';
+
+  const { error } = await _supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/app/dashboard.html`,
+      data: { role }
+    }
+  });
+
+  if (error) {
+    showError('Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Continue with Email';
+    return;
+  }
+
+  document.getElementById('sent-to').textContent = email;
+  document.getElementById('signup-form').style.display = 'none';
+  document.getElementById('check-screen').style.display = 'block';
+}
+
+document.getElementById('email').addEventListener('keypress', e => { if (e.key === 'Enter') handleSignup(); });
+document.getElementById('invite-code').addEventListener('keypress', e => { if (e.key === 'Enter') handleSignup(); });
+</script>
+</body>
+</html>

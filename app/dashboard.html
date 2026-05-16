@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wishlist — VenuZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#0F0E0B;
+  --terracotta:#D85A30;
+  --terracotta-light:#F0A882;
+  --warm-white:#FDFBF8;
+  --muted:#9A9488;
+  --border:rgba(255,255,255,0.08);
+  --card-bg:rgba(255,255,255,0.03);
+}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--charcoal);
+  color:var(--warm-white);
+  min-height:100vh;
+}
+
+/* ── nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 32px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(15,14,11,0.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+}
+.nav-logo span{color:var(--terracotta)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.beta-badge{
+  font-size:8px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--terracotta);
+  border:1px solid rgba(216,90,48,0.4);
+  padding:4px 10px;border-radius:999px;
+  display:none;
+}
+.nav-email{font-size:10px;color:var(--muted)}
+.nav-signout{
+  font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);
+  background:none;border:none;cursor:pointer;
+  transition:color 0.2s;padding:0;
+}
+.nav-signout:hover{color:var(--warm-white)}
+
+/* ── main ── */
+main{
+  max-width:720px;margin:0 auto;
+  padding:88px 24px 80px;
+}
+
+/* ── header ── */
+.page-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:32px;flex-wrap:wrap;gap:16px;
+}
+.page-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px;font-weight:300;line-height:1;
+}
+.add-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  background:var(--terracotta);border:none;
+  border-radius:999px;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.add-btn:hover{background:#C04E28}
+
+/* ── filters ── */
+.filters{
+  display:flex;gap:8px;flex-wrap:wrap;
+  margin-bottom:28px;
+}
+.filter-btn{
+  font-size:9px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;padding:6px 14px;
+  border-radius:999px;border:1px solid var(--border);
+  background:none;color:var(--muted);cursor:pointer;
+  transition:all 0.2s;
+}
+.filter-btn:hover,.filter-btn.active{
+  border-color:rgba(216,90,48,0.5);
+  color:var(--terracotta);
+  background:rgba(216,90,48,0.08);
+}
+
+/* ── empty state ── */
+.empty{
+  text-align:center;padding:80px 24px;
+}
+.empty-icon{font-size:40px;margin-bottom:20px;opacity:0.4}
+.empty-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:300;margin-bottom:10px;
+  color:rgba(255,255,255,0.5);
+}
+.empty-sub{font-size:11px;color:var(--muted);line-height:1.8}
+
+/* ── place cards ── */
+.places-grid{
+  display:flex;flex-direction:column;gap:12px;
+}
+.place-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;
+  transition:border-color 0.2s;
+}
+.place-card:hover{border-color:rgba(255,255,255,0.15)}
+.place-info{flex:1;min-width:0}
+.place-name{
+  font-size:14px;font-weight:500;margin-bottom:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.place-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.place-category{
+  font-size:9px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--terracotta);
+}
+.place-city{font-size:10px;color:var(--muted)}
+.place-note{
+  font-size:10px;color:rgba(255,255,255,0.4);
+  margin-top:8px;line-height:1.5;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.place-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.place-tag{
+  font-size:9px;letter-spacing:0.5px;
+  padding:3px 10px;border-radius:999px;
+  background:rgba(216,90,48,0.1);
+  border:1px solid rgba(216,90,48,0.2);
+  color:var(--terracotta-light);
+}
+.place-delete{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,0.15);font-size:16px;
+  transition:color 0.2s;flex-shrink:0;padding:4px;
+}
+.place-delete:hover{color:rgba(216,90,48,0.7)}
+
+/* ── add modal ── */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:24px;
+}
+.overlay.open{display:flex}
+.modal{
+  background:#1a1916;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  padding:36px;
+  width:100%;max-width:460px;
+  max-height:90vh;overflow-y:auto;
+}
+.modal-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:300;margin-bottom:28px;
+}
+.field{margin-bottom:16px}
+.field label{
+  display:block;font-size:9px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;outline:none;
+  color:var(--warm-white);
+  font-family:'Montserrat',sans-serif;
+  font-size:12px;transition:border-color 0.2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:rgba(216,90,48,0.5);
+}
+.field input::placeholder,.field textarea::placeholder{
+  color:rgba(255,255,255,0.2);
+}
+.field select option{background:#1a1916}
+.field textarea{resize:vertical;min-height:80px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;margin-top:24px}
+.modal-cancel{
+  flex:1;padding:12px;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:none;color:var(--muted);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;
+}
+.modal-cancel:hover{border-color:rgba(255,255,255,0.3);color:var(--warm-white)}
+.modal-save{
+  flex:2;padding:12px;border-radius:8px;
+  background:var(--terracotta);border:none;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.modal-save:hover{background:#C04E28}
+.modal-save:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
+
+/* ── beta banner ── */
+.beta-banner{
+  display:none;
+  background:rgba(216,90,48,0.08);
+  border:1px solid rgba(216,90,48,0.2);
+  border-radius:10px;padding:14px 20px;
+  margin-bottom:28px;
+  display:none;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+}
+.beta-banner-text{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.6}
+.beta-banner-text strong{color:var(--terracotta-light)}
+.beta-link{
+  font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--terracotta);
+  text-decoration:none;white-space:nowrap;
+}
+.beta-link:hover{color:var(--terracotta-light)}
+
+@media(max-width:600px){
+  nav{padding:0 20px}
+  main{padding:80px 16px 60px}
+  .modal{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo">V<span>e</span>nuZ</a>
+  <div class="nav-right">
+    <span class="beta-badge" id="beta-badge">Beta</span>
+    <span class="nav-email" id="nav-email"></span>
+    <button class="nav-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Beta banner (shown to beta users only) -->
+  <div class="beta-banner" id="beta-banner">
+    <div class="beta-banner-text">
+      <strong>You're a beta user.</strong> More features coming soon — Google Maps import, share from Instagram & TikTok, and Friends Feed.
+    </div>
+  </div>
+
+  <div class="page-header">
+    <h1 class="page-title">My Wishlist</h1>
+    <button class="add-btn" onclick="openModal()">+ Save a Place</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterBy('all', this)">All</button>
+    <button class="filter-btn" onclick="filterBy('Restaurant', this)">Restaurants</button>
+    <button class="filter-btn" onclick="filterBy('Bar', this)">Bars</button>
+    <button class="filter-btn" onclick="filterBy('Spa', this)">Spas</button>
+    <button class="filter-btn" onclick="filterBy('Hotel', this)">Hotels</button>
+    <button class="filter-btn" onclick="filterBy('Beach', this)">Beaches</button>
+    <button class="filter-btn" onclick="filterBy('Market', this)">Markets</button>
+    <button class="filter-btn" onclick="filterBy('Lounge', this)">Lounges</button>
+    <button class="filter-btn" onclick="filterBy('Other', this)">Other</button>
+  </div>
+
+  <div id="places-container">
+    <div class="empty">
+      <div class="empty-icon">📍</div>
+      <div class="empty-title">Nothing saved yet</div>
+      <p class="empty-sub">Hit "Save a Place" to start building your wishlist.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- Add Place Modal -->
+<div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Save a Place</div>
+    <div class="field">
+      <label>Place Name *</label>
+      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+    </div>
+    <div class="field">
+      <label>Category *</label>
+      <select id="place-category">
+        <option value="">Select a category</option>
+        <option>Restaurant</option>
+        <option>Bar</option>
+        <option>Spa</option>
+        <option>Hotel</option>
+        <option>Beach</option>
+        <option>Market</option>
+        <option>Lounge</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="place-city" placeholder="e.g. New York, Accra"/>
+    </div>
+    <div class="field">
+      <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <textarea id="place-note" placeholder="Why do you want to go? Any details worth remembering…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-save" id="save-btn" onclick="savePlace()">Save Place</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+let currentUser = null;
+let currentRole = 'user';
+let allPlaces = [];
+let activeFilter = 'all';
+
+// ── Auth guard ──
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  currentUser = session.user;
+  document.getElementById('nav-email').textContent = currentUser.email;
+
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (profile?.role === 'beta') {
+    currentRole = 'beta';
+    document.getElementById('beta-badge').style.display = 'block';
+    document.getElementById('beta-banner').style.display = 'flex';
+  }
+
+  await loadPlaces();
+}
+
+// ── Places ──
+async function loadPlaces() {
+  const { data, error } = await _supabase
+    .from('places')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+  allPlaces = data || [];
+  renderPlaces();
+}
+
+function renderPlaces() {
+  const filtered = activeFilter === 'all'
+    ? allPlaces
+    : allPlaces.filter(p => p.category === activeFilter);
+
+  const container = document.getElementById('places-container');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📍</div>
+        <div class="empty-title">${activeFilter === 'all' ? 'Nothing saved yet' : 'No ' + activeFilter + 's saved'}</div>
+        <p class="empty-sub">${activeFilter === 'all' ? 'Hit "Save a Place" to start building your wishlist.' : 'Save your first ' + activeFilter.toLowerCase() + ' to see it here.'}</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="places-grid">${filtered.map(placeCard).join('')}</div>`;
+}
+
+function placeCard(p) {
+  return `
+    <div class="place-card">
+      <div class="place-info">
+        <div class="place-name">${escHtml(p.name)}</div>
+        <div class="place-meta">
+          ${p.category ? `<span class="place-category">${escHtml(p.category)}</span>` : ''}
+          ${p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : ''}
+        </div>
+        ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
+      </div>
+      <button class="place-delete" onclick="deletePlace('${p.id}')" title="Remove">✕</button>
+    </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function filterBy(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlaces();
+}
+
+// ── Save place ──
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('place-name').focus();
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('place-name').value = '';
+  document.getElementById('place-category').value = '';
+  document.getElementById('place-city').value = '';
+  document.getElementById('place-note').value = '';
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-btn').textContent = 'Save Place';
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+async function savePlace() {
+  const name = document.getElementById('place-name').value.trim();
+  const category = document.getElementById('place-category').value;
+  const city = document.getElementById('place-city').value.trim();
+  const note = document.getElementById('place-note').value.trim();
+  const btn = document.getElementById('save-btn');
+
+  if (!name) { document.getElementById('place-name').focus(); return; }
+  if (!category) { document.getElementById('place-category').focus(); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const record = { user_id: currentUser.id, name, category };
+  if (city) record.city = city;
+  if (note) record.note = note;
+
+  const { error } = await _supabase.from('places').insert([record]);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Save Place';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+
+  closeModal();
+  await loadPlaces();
+}
+
+// ── Delete ──
+async function deletePlace(id) {
+  const { error } = await _supabase.from('places').delete().eq('id', id).eq('user_id', currentUser.id);
+  if (!error) await loadPlaces();
+}
+
+// ── Sign out ──
+async function signOut() {
+  await _supabase.auth.signOut();
+  window.location.href = '../index.html';
+}
+
+init();
+</script>
+</body>
+</html>
