@@ -54,6 +54,7 @@ nav{
   color:var(--warm-white);
 }
 .nav-logo span{color:var(--terracotta)}
+.nav-right{display:flex;align-items:center;gap:10px}
 .nav-cta{
   font-size:10px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;color:var(--warm-white);
@@ -62,6 +63,8 @@ nav{
   cursor:pointer;transition:all 0.2s;text-decoration:none;
 }
 .nav-cta:hover{background:var(--terracotta);border-color:var(--terracotta)}
+.nav-cta.filled{background:var(--terracotta);border-color:var(--terracotta)}
+.nav-cta.filled:hover{background:#C04E28;border-color:#C04E28}
 
 /* ─── HERO ─── */
 .hero{
@@ -624,6 +627,8 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
   .hero{padding:100px 20px 60px}
   .waitlist-form{flex-direction:column;border-radius:12px}
   .waitlist-btn{border-radius:0 0 12px 12px;padding:14px}
+  .waitlist-input{font-size:16px}
+  #city-input{font-size:16px}
   footer{flex-direction:column;text-align:center;padding:20px}
   .footer-links,.footer-social{justify-content:center}
   .step{flex-direction:column;gap:8px}
