@@ -19,13 +19,11 @@
   --muted:#9A9488;
   --border:rgba(255,255,255,0.08);
   --card-bg:rgba(255,255,255,0.03);
+  --green:rgba(75,165,90,1);
+  --green-bg:rgba(75,165,90,0.1);
+  --green-border:rgba(75,165,90,0.3);
 }
-body{
-  font-family:'Montserrat',sans-serif;
-  background:var(--charcoal);
-  color:var(--warm-white);
-  min-height:100vh;
-}
+body{font-family:'Montserrat',sans-serif;background:var(--charcoal);color:var(--warm-white);min-height:100vh}
 
 /* ── nav ── */
 nav{
@@ -36,21 +34,20 @@ nav{
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(10px);
 }
-.nav-logo{
-  font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:400;letter-spacing:1px;
-  color:var(--warm-white);text-decoration:none;
-}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;letter-spacing:1px;color:var(--warm-white);text-decoration:none}
 .nav-logo span{color:var(--terracotta)}
 .nav-right{display:flex;align-items:center;gap:16px}
 .beta-badge{
   font-size:8px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;color:var(--terracotta);
   border:1px solid rgba(216,90,48,0.4);
-  padding:4px 10px;border-radius:999px;
-  display:none;
+  padding:4px 10px;border-radius:999px;display:none;
 }
-.nav-email{font-size:10px;color:var(--muted)}
+.nav-profile{
+  font-size:10px;color:var(--muted);text-decoration:none;
+  transition:color 0.2s;
+}
+.nav-profile:hover{color:var(--warm-white)}
 .nav-signout{
   font-size:9px;font-weight:600;letter-spacing:1px;
   text-transform:uppercase;color:var(--muted);
@@ -60,20 +57,14 @@ nav{
 .nav-signout:hover{color:var(--warm-white)}
 
 /* ── main ── */
-main{
-  max-width:720px;margin:0 auto;
-  padding:88px 24px 80px;
-}
+main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 
-/* ── header ── */
+/* ── page header ── */
 .page-header{
   display:flex;align-items:flex-end;justify-content:space-between;
-  margin-bottom:32px;flex-wrap:wrap;gap:16px;
+  margin-bottom:28px;flex-wrap:wrap;gap:16px;
 }
-.page-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:42px;font-weight:300;line-height:1;
-}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;line-height:1}
 .add-btn{
   display:flex;align-items:center;gap:8px;
   padding:10px 20px;
@@ -87,9 +78,12 @@ main{
 .add-btn:hover{background:#C04E28}
 
 /* ── filters ── */
-.filters{
-  display:flex;gap:8px;flex-wrap:wrap;
-  margin-bottom:28px;
+.filter-section{margin-bottom:28px;display:flex;flex-direction:column;gap:10px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-row-label{
+  font-size:8px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,0.2);
+  align-self:center;white-space:nowrap;
 }
 .filter-btn{
   font-size:9px;font-weight:600;letter-spacing:1.5px;
@@ -98,70 +92,76 @@ main{
   background:none;color:var(--muted);cursor:pointer;
   transition:all 0.2s;
 }
-.filter-btn:hover,.filter-btn.active{
-  border-color:rgba(216,90,48,0.5);
-  color:var(--terracotta);
-  background:rgba(216,90,48,0.08);
-}
+.filter-btn:hover{border-color:rgba(216,90,48,0.5);color:var(--terracotta);background:rgba(216,90,48,0.06)}
+.filter-btn.active{border-color:rgba(216,90,48,0.5);color:var(--terracotta);background:rgba(216,90,48,0.08)}
+.filter-btn.visited-active{border-color:var(--green-border);color:#7dd87f;background:var(--green-bg)}
+.filter-btn.visited-active:hover{border-color:rgba(75,165,90,0.5);color:#7dd87f}
 
 /* ── empty state ── */
-.empty{
-  text-align:center;padding:80px 24px;
-}
+.empty{text-align:center;padding:80px 24px}
 .empty-icon{font-size:40px;margin-bottom:20px;opacity:0.4}
-.empty-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:26px;font-weight:300;margin-bottom:10px;
-  color:rgba(255,255,255,0.5);
-}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;margin-bottom:10px;color:rgba(255,255,255,0.5)}
 .empty-sub{font-size:11px;color:var(--muted);line-height:1.8}
 
 /* ── place cards ── */
-.places-grid{
-  display:flex;flex-direction:column;gap:12px;
-}
+.places-grid{display:flex;flex-direction:column;gap:10px}
 .place-card{
   background:var(--card-bg);
   border:1px solid var(--border);
   border-radius:12px;
-  padding:20px 24px;
-  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;
+  display:flex;align-items:flex-start;justify-content:space-between;
   gap:16px;
   transition:border-color 0.2s;
 }
-.place-card:hover{border-color:rgba(255,255,255,0.15)}
+.place-card:hover{border-color:rgba(255,255,255,0.13)}
+.place-card.visited{border-color:var(--green-border)}
 .place-info{flex:1;min-width:0}
-.place-name{
-  font-size:14px;font-weight:500;margin-bottom:6px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
+.place-name{font-size:14px;font-weight:500;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .place-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.place-category{
-  font-size:9px;font-weight:600;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--terracotta);
-}
+.place-category{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--terracotta)}
 .place-city{font-size:10px;color:var(--muted)}
-.place-note{
-  font-size:10px;color:rgba(255,255,255,0.4);
-  margin-top:8px;line-height:1.5;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.visited-badge{
+  font-size:8px;font-weight:600;letter-spacing:1.2px;
+  text-transform:uppercase;color:#7dd87f;
+  border:1px solid var(--green-border);
+  padding:2px 8px;border-radius:999px;
 }
+.place-note{font-size:10px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.place-url{
+  display:inline-block;margin-top:8px;
+  font-size:10px;color:var(--terracotta-light);
+  text-decoration:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:100%;
+}
+.place-url:hover{color:var(--terracotta)}
 .place-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .place-tag{
   font-size:9px;letter-spacing:0.5px;
   padding:3px 10px;border-radius:999px;
-  background:rgba(216,90,48,0.1);
-  border:1px solid rgba(216,90,48,0.2);
+  background:rgba(216,90,48,0.08);
+  border:1px solid rgba(216,90,48,0.18);
   color:var(--terracotta-light);
 }
-.place-delete{
-  background:none;border:none;cursor:pointer;
-  color:rgba(255,255,255,0.15);font-size:16px;
-  transition:color 0.2s;flex-shrink:0;padding:4px;
-}
-.place-delete:hover{color:rgba(216,90,48,0.7)}
 
-/* ── add modal ── */
+/* ── card actions ── */
+.place-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;padding-top:2px}
+.action-btn{
+  width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--border);
+  background:none;cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.25);
+}
+.action-btn:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)}
+.visited-btn.active{border-color:var(--green-border);color:#7dd87f;background:var(--green-bg)}
+.visited-btn.active:hover{background:rgba(75,165,90,0.15)}
+.delete-btn:hover{border-color:rgba(216,90,48,0.4);color:var(--terracotta-light)}
+
+/* ── modal ── */
 .overlay{
   display:none;position:fixed;inset:0;z-index:200;
   background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
@@ -176,10 +176,7 @@ main{
   width:100%;max-width:460px;
   max-height:90vh;overflow-y:auto;
 }
-.modal-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:28px;font-weight:300;margin-bottom:28px;
-}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:28px}
 .field{margin-bottom:16px}
 .field label{
   display:block;font-size:9px;font-weight:600;
@@ -195,14 +192,11 @@ main{
   font-family:'Montserrat',sans-serif;
   font-size:12px;transition:border-color 0.2s;
 }
-.field input:focus,.field select:focus,.field textarea:focus{
-  border-color:rgba(216,90,48,0.5);
-}
-.field input::placeholder,.field textarea::placeholder{
-  color:rgba(255,255,255,0.2);
-}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(216,90,48,0.5)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,0.2)}
 .field select option{background:#1a1916}
 .field textarea{resize:vertical;min-height:80px;line-height:1.6}
+.field-hint{font-size:9px;color:var(--muted);letter-spacing:0.3px;margin-top:6px}
 .modal-actions{display:flex;gap:10px;margin-top:24px}
 .modal-cancel{
   flex:1;padding:12px;border-radius:8px;
@@ -228,26 +222,21 @@ main{
 /* ── beta banner ── */
 .beta-banner{
   display:none;
-  background:rgba(216,90,48,0.08);
-  border:1px solid rgba(216,90,48,0.2);
+  background:rgba(216,90,48,0.06);
+  border:1px solid rgba(216,90,48,0.18);
   border-radius:10px;padding:14px 20px;
   margin-bottom:28px;
-  display:none;align-items:center;justify-content:space-between;gap:16px;
-  flex-wrap:wrap;
+  flex-direction:column;gap:6px;
 }
-.beta-banner-text{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.6}
+.beta-banner-text{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6}
 .beta-banner-text strong{color:var(--terracotta-light)}
-.beta-link{
-  font-size:9px;font-weight:600;letter-spacing:1px;
-  text-transform:uppercase;color:var(--terracotta);
-  text-decoration:none;white-space:nowrap;
-}
-.beta-link:hover{color:var(--terracotta-light)}
 
 @media(max-width:600px){
   nav{padding:0 20px}
   main{padding:80px 16px 60px}
   .modal{padding:28px 20px}
+  .page-title{font-size:34px}
+  .nav-profile{display:none}
 }
 </style>
 </head>
@@ -257,17 +246,16 @@ main{
   <a href="../index.html" class="nav-logo">V<span>e</span>nuZ</a>
   <div class="nav-right">
     <span class="beta-badge" id="beta-badge">Beta</span>
-    <span class="nav-email" id="nav-email"></span>
+    <a href="profile.html" class="nav-profile" id="nav-profile">—</a>
     <button class="nav-signout" onclick="signOut()">Sign out</button>
   </div>
 </nav>
 
 <main>
 
-  <!-- Beta banner (shown to beta users only) -->
   <div class="beta-banner" id="beta-banner">
     <div class="beta-banner-text">
-      <strong>You're a beta user.</strong> More features coming soon — Google Maps import, share from Instagram & TikTok, and Friends Feed.
+      <strong>You're a beta user.</strong> More features coming soon — Google Maps import, share from Instagram &amp; TikTok, and Friends Feed.
     </div>
   </div>
 
@@ -276,35 +264,38 @@ main{
     <button class="add-btn" onclick="openModal()">+ Save a Place</button>
   </div>
 
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterBy('all', this)">All</button>
-    <button class="filter-btn" onclick="filterBy('Restaurant', this)">Restaurants</button>
-    <button class="filter-btn" onclick="filterBy('Bar', this)">Bars</button>
-    <button class="filter-btn" onclick="filterBy('Spa', this)">Spas</button>
-    <button class="filter-btn" onclick="filterBy('Hotel', this)">Hotels</button>
-    <button class="filter-btn" onclick="filterBy('Beach', this)">Beaches</button>
-    <button class="filter-btn" onclick="filterBy('Market', this)">Markets</button>
-    <button class="filter-btn" onclick="filterBy('Lounge', this)">Lounges</button>
-    <button class="filter-btn" onclick="filterBy('Other', this)">Other</button>
-  </div>
-
-  <div id="places-container">
-    <div class="empty">
-      <div class="empty-icon">📍</div>
-      <div class="empty-title">Nothing saved yet</div>
-      <p class="empty-sub">Hit "Save a Place" to start building your wishlist.</p>
+  <!-- Status filters -->
+  <div class="filter-section">
+    <div class="filter-row" id="status-filters">
+      <button class="filter-btn active" data-status="all" onclick="setStatus('all', this)">All</button>
+      <button class="filter-btn" data-status="wishlist" onclick="setStatus('wishlist', this)">Wishlist</button>
+      <button class="filter-btn" data-status="visited" onclick="setStatus('visited', this)">Visited</button>
+    </div>
+    <!-- Category filters -->
+    <div class="filter-row" id="category-filters">
+      <button class="filter-btn active" data-cat="all" onclick="setCategory('all', this)">All Types</button>
+      <button class="filter-btn" data-cat="Restaurant" onclick="setCategory('Restaurant', this)">Restaurants</button>
+      <button class="filter-btn" data-cat="Bar" onclick="setCategory('Bar', this)">Bars</button>
+      <button class="filter-btn" data-cat="Spa" onclick="setCategory('Spa', this)">Spas</button>
+      <button class="filter-btn" data-cat="Hotel" onclick="setCategory('Hotel', this)">Hotels</button>
+      <button class="filter-btn" data-cat="Beach" onclick="setCategory('Beach', this)">Beaches</button>
+      <button class="filter-btn" data-cat="Market" onclick="setCategory('Market', this)">Markets</button>
+      <button class="filter-btn" data-cat="Lounge" onclick="setCategory('Lounge', this)">Lounges</button>
+      <button class="filter-btn" data-cat="Other" onclick="setCategory('Other', this)">Other</button>
     </div>
   </div>
 
+  <div id="places-container"></div>
+
 </main>
 
-<!-- Add Place Modal -->
+<!-- Add / Edit Modal -->
 <div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
   <div class="modal">
-    <div class="modal-title">Save a Place</div>
+    <div class="modal-title" id="modal-title">Save a Place</div>
     <div class="field">
       <label>Place Name *</label>
-      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard" autocomplete="off"/>
     </div>
     <div class="field">
       <label>Category *</label>
@@ -322,11 +313,20 @@ main{
     </div>
     <div class="field">
       <label>City</label>
-      <input type="text" id="place-city" placeholder="e.g. New York, Accra"/>
+      <input type="text" id="place-city" placeholder="e.g. New York, Accra" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Link <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="url" id="place-url" placeholder="Google Maps, Instagram, TikTok…" autocomplete="off"/>
     </div>
     <div class="field">
       <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <textarea id="place-note" placeholder="Why do you want to go? Any details worth remembering…"></textarea>
+    </div>
+    <div class="field">
+      <label>Tags <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="place-tags" placeholder="e.g. rooftop, romantic, cocktails" autocomplete="off"/>
+      <div class="field-hint">Separate tags with commas.</div>
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -343,9 +343,10 @@ const _supabase = createClient(
 );
 
 let currentUser = null;
-let currentRole = 'user';
 let allPlaces = [];
-let activeFilter = 'all';
+let statusFilter = 'all';
+let categoryFilter = 'all';
+let editingId = null;
 
 // ── Auth guard ──
 async function init() {
@@ -353,7 +354,8 @@ async function init() {
   if (!session) { window.location.href = 'login.html'; return; }
 
   currentUser = session.user;
-  document.getElementById('nav-email').textContent = currentUser.email;
+  const email = currentUser.email || '';
+  document.getElementById('nav-profile').textContent = email;
 
   const { data: profile } = await _supabase
     .from('profiles')
@@ -362,7 +364,6 @@ async function init() {
     .single();
 
   if (profile?.role === 'beta') {
-    currentRole = 'beta';
     document.getElementById('beta-badge').style.display = 'block';
     document.getElementById('beta-banner').style.display = 'flex';
   }
@@ -384,18 +385,20 @@ async function loadPlaces() {
 }
 
 function renderPlaces() {
-  const filtered = activeFilter === 'all'
-    ? allPlaces
-    : allPlaces.filter(p => p.category === activeFilter);
+  let filtered = allPlaces;
+  if (statusFilter === 'wishlist') filtered = filtered.filter(p => !p.visited);
+  if (statusFilter === 'visited')  filtered = filtered.filter(p => !!p.visited);
+  if (categoryFilter !== 'all')    filtered = filtered.filter(p => p.category === categoryFilter);
 
   const container = document.getElementById('places-container');
 
   if (filtered.length === 0) {
+    const { title, sub } = emptyMessage();
     container.innerHTML = `
       <div class="empty">
         <div class="empty-icon">📍</div>
-        <div class="empty-title">${activeFilter === 'all' ? 'Nothing saved yet' : 'No ' + activeFilter + 's saved'}</div>
-        <p class="empty-sub">${activeFilter === 'all' ? 'Hit "Save a Place" to start building your wishlist.' : 'Save your first ' + activeFilter.toLowerCase() + ' to see it here.'}</p>
+        <div class="empty-title">${title}</div>
+        <p class="empty-sub">${sub}</p>
       </div>`;
     return;
   }
@@ -403,55 +406,138 @@ function renderPlaces() {
   container.innerHTML = `<div class="places-grid">${filtered.map(placeCard).join('')}</div>`;
 }
 
+function emptyMessage() {
+  if (statusFilter === 'visited')
+    return { title: 'No visited places yet', sub: 'Tick the ✓ on any saved place to mark it as visited.' };
+  if (statusFilter === 'wishlist' && categoryFilter === 'all')
+    return { title: 'Wishlist is empty', sub: 'Hit "Save a Place" to start building your wishlist.' };
+  if (statusFilter === 'all' && categoryFilter === 'all')
+    return { title: 'Nothing saved yet', sub: 'Hit "Save a Place" to start building your wishlist.' };
+  return { title: `No ${categoryFilter.toLowerCase()}s found`, sub: 'Try adjusting your filters.' };
+}
+
+function parseTags(tags) {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags.filter(Boolean);
+  return String(tags).split(',').map(t => t.trim()).filter(Boolean);
+}
+
+function safeUrl(url) {
+  if (!url) return '';
+  const t = url.trim();
+  return /^https?:\/\//i.test(t) ? t : 'https://' + t;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function placeCard(p) {
+  const visited = !!p.visited;
+  const tags = parseTags(p.tags);
+  const url = p.url || '';
+  const displayUrl = url.replace(/^https?:\/\//i, '').substring(0, 45);
+
   return `
-    <div class="place-card">
+    <div class="place-card${visited ? ' visited' : ''}">
       <div class="place-info">
         <div class="place-name">${escHtml(p.name)}</div>
         <div class="place-meta">
           ${p.category ? `<span class="place-category">${escHtml(p.category)}</span>` : ''}
           ${p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : ''}
+          ${visited ? '<span class="visited-badge">Visited</span>' : ''}
         </div>
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
+        ${url ? `<a class="place-url" href="${escHtml(safeUrl(url))}" target="_blank" rel="noopener noreferrer">🔗 ${escHtml(displayUrl)}</a>` : ''}
+        ${tags.length ? `<div class="place-tags">${tags.map(t => `<span class="place-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
       </div>
-      <button class="place-delete" onclick="deletePlace('${p.id}')" title="Remove">✕</button>
+      <div class="place-actions">
+        <button class="action-btn visited-btn${visited ? ' active' : ''}" onclick="toggleVisited('${p.id}', ${!visited})" title="${visited ? 'Move to wishlist' : 'Mark as visited'}">✓</button>
+        <button class="action-btn edit-btn" onclick="openEditModal('${p.id}')" title="Edit">✎</button>
+        <button class="action-btn delete-btn" onclick="deletePlace('${p.id}')" title="Remove">✕</button>
+      </div>
     </div>`;
 }
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ── Filters ──
+function setStatus(status, btn) {
+  statusFilter = status;
+  document.querySelectorAll('#status-filters .filter-btn').forEach(b => {
+    b.classList.remove('active', 'visited-active');
+  });
+  if (status === 'visited') btn.classList.add('visited-active');
+  else btn.classList.add('active');
+  renderPlaces();
 }
 
-function filterBy(cat, btn) {
-  activeFilter = cat;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+function setCategory(cat, btn) {
+  categoryFilter = cat;
+  document.querySelectorAll('#category-filters .filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderPlaces();
 }
 
-// ── Save place ──
+// ── Modal ──
 function openModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Save a Place';
+  document.getElementById('save-btn').textContent = 'Save Place';
+  clearModalFields();
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('place-name').focus();
 }
+
+function openEditModal(id) {
+  const p = allPlaces.find(p => p.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Place';
+  document.getElementById('save-btn').textContent = 'Save Changes';
+  document.getElementById('place-name').value = p.name || '';
+  document.getElementById('place-category').value = p.category || '';
+  document.getElementById('place-city').value = p.city || '';
+  document.getElementById('place-url').value = p.url || '';
+  document.getElementById('place-note').value = p.note || '';
+  document.getElementById('place-tags').value = parseTags(p.tags).join(', ');
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('place-name').focus();
+}
+
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
-  document.getElementById('place-name').value = '';
-  document.getElementById('place-category').value = '';
-  document.getElementById('place-city').value = '';
-  document.getElementById('place-note').value = '';
-  document.getElementById('save-btn').disabled = false;
-  document.getElementById('save-btn').textContent = 'Save Place';
+  editingId = null;
+  clearModalFields();
+  const btn = document.getElementById('save-btn');
+  btn.disabled = false;
+  btn.textContent = 'Save Place';
 }
+
+function clearModalFields() {
+  ['place-name','place-city','place-url','place-note','place-tags'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('place-category').value = '';
+}
+
 function handleOverlayClick(e) {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 }
 
-async function savePlace() {
+function collectFields() {
   const name = document.getElementById('place-name').value.trim();
   const category = document.getElementById('place-category').value;
   const city = document.getElementById('place-city').value.trim();
+  const url = document.getElementById('place-url').value.trim();
   const note = document.getElementById('place-note').value.trim();
+  const tagsRaw = document.getElementById('place-tags').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  return { name, category, city, url, note, tags };
+}
+
+async function savePlace() {
+  const { name, category, city, url, note, tags } = collectFields();
   const btn = document.getElementById('save-btn');
 
   if (!name) { document.getElementById('place-name').focus(); return; }
@@ -460,27 +546,69 @@ async function savePlace() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
-  const record = { user_id: currentUser.id, name, category };
-  if (city) record.city = city;
-  if (note) record.note = note;
+  if (editingId) {
+    await updatePlace(editingId, { name, category, city, url, note, tags });
+  } else {
+    await insertPlace({ name, category, city, url, note, tags });
+  }
+}
 
+async function insertPlace(fields) {
+  const btn = document.getElementById('save-btn');
+  const record = { user_id: currentUser.id, ...buildRecord(fields) };
   const { error } = await _supabase.from('places').insert([record]);
-
   if (error) {
     btn.disabled = false;
     btn.textContent = 'Save Place';
     alert('Something went wrong. Please try again.');
     return;
   }
-
   closeModal();
   await loadPlaces();
+}
+
+async function updatePlace(id, fields) {
+  const btn = document.getElementById('save-btn');
+  const record = buildRecord(fields);
+  const { error } = await _supabase.from('places').update(record).eq('id', id).eq('user_id', currentUser.id);
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+  closeModal();
+  await loadPlaces();
+}
+
+function buildRecord({ name, category, city, url, note, tags }) {
+  const r = { name, category };
+  if (city)  r.city = city;
+  if (url)   r.url = url;
+  if (note)  r.note = note;
+  r.tags = tags.length ? tags : null;
+  return r;
+}
+
+// ── Visited toggle ──
+async function toggleVisited(id, newState) {
+  const update = { visited: newState };
+  if (newState) update.visited_at = new Date().toISOString();
+  const { error } = await _supabase.from('places').update(update).eq('id', id).eq('user_id', currentUser.id);
+  if (!error) {
+    const p = allPlaces.find(p => p.id === id);
+    if (p) { p.visited = newState; if (newState) p.visited_at = update.visited_at; }
+    renderPlaces();
+  }
 }
 
 // ── Delete ──
 async function deletePlace(id) {
   const { error } = await _supabase.from('places').delete().eq('id', id).eq('user_id', currentUser.id);
-  if (!error) await loadPlaces();
+  if (!error) {
+    allPlaces = allPlaces.filter(p => p.id !== id);
+    renderPlaces();
+  }
 }
 
 // ── Sign out ──
