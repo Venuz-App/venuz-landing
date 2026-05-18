@@ -222,7 +222,7 @@ async function handleSignup() {
   const { error } = await _supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${window.location.origin}/app/dashboard.html`,
+      emailRedirectTo: `${window.location.origin}/app/auth-callback.html`,
       data: { role }
     }
   });

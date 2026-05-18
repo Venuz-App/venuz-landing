@@ -178,7 +178,7 @@ async function handleLogin() {
 
   const { error } = await _supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}/app/dashboard.html` }
+    options: { emailRedirectTo: `${window.location.origin}/app/auth-callback.html` }
   });
 
   if (error) {
