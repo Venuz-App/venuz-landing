@@ -227,7 +227,6 @@ main{
 
 /* ── beta banner ── */
 .beta-banner{
-  display:none;
   background:rgba(216,90,48,0.08);
   border:1px solid rgba(216,90,48,0.2);
   border-radius:10px;padding:14px 20px;
@@ -243,6 +242,45 @@ main{
   text-decoration:none;white-space:nowrap;
 }
 .beta-link:hover{color:var(--terracotta-light)}
+
+/* ── import btn (beta only) ── */
+.import-btn{
+  display:none;align-items:center;gap:8px;
+  padding:10px 20px;
+  background:none;
+  border:1px solid rgba(216,90,48,0.4);
+  border-radius:999px;color:var(--terracotta);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;
+}
+.import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
+
+/* ── import modal ── */
+.import-drop{
+  border:2px dashed rgba(216,90,48,0.3);
+  border-radius:10px;
+  padding:36px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color 0.2s,background 0.2s;
+  margin-bottom:20px;
+}
+.import-drop:hover,.import-drop.dragover{
+  border-color:var(--terracotta);
+  background:rgba(216,90,48,0.05);
+}
+.import-drop-icon{font-size:32px;margin-bottom:12px}
+.import-drop-title{font-size:12px;font-weight:500;margin-bottom:6px}
+.import-drop-sub{font-size:10px;color:var(--muted);line-height:1.7}
+.import-drop-sub a{color:var(--terracotta);text-decoration:none}
+.import-results{
+  font-size:11px;color:rgba(255,255,255,0.6);
+  line-height:1.8;margin-bottom:16px;
+  display:none;
+}
+.import-results strong{color:var(--warm-white)}
 
 @media(max-width:600px){
   nav{padding:0 20px}
@@ -273,7 +311,10 @@ main{
 
   <div class="page-header">
     <h1 class="page-title">My Wishlist</h1>
-    <button class="add-btn" onclick="openModal()">+ Save a Place</button>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="import-btn" id="import-btn" onclick="openImportModal()">↑ Import Google Maps</button>
+      <button class="add-btn" onclick="openModal()">+ Save a Place</button>
+    </div>
   </div>
 
   <div class="filters">
@@ -335,6 +376,33 @@ main{
   </div>
 </div>
 
+<!-- Import Modal (beta only) -->
+<div class="overlay" id="import-overlay" onclick="handleImportOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Import from Google Maps</div>
+    <p style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:20px;">
+      Export your saved places from Google Maps via
+      <a href="https://takeout.google.com" target="_blank" style="color:var(--terracotta);text-decoration:none;">Google Takeout</a>.
+      Select <strong style="color:rgba(253,251,248,0.7)">Maps (your places)</strong>, download the zip, then upload the
+      <strong style="color:rgba(253,251,248,0.7)">Saved Places.json</strong> file below.
+    </p>
+
+    <div class="import-drop" id="import-drop" onclick="document.getElementById('file-input').click()">
+      <div class="import-drop-icon">📂</div>
+      <div class="import-drop-title">Drop your Saved Places.json here</div>
+      <div class="import-drop-sub">or click to browse</div>
+      <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+
+    <div class="import-results" id="import-results"></div>
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeImportModal()">Cancel</button>
+      <button class="modal-save" id="import-save-btn" onclick="runImport()" disabled>Import Places</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const { createClient } = supabase;
 const _supabase = createClient(
@@ -365,6 +433,7 @@ async function init() {
     currentRole = 'beta';
     document.getElementById('beta-badge').style.display = 'block';
     document.getElementById('beta-banner').style.display = 'flex';
+    document.getElementById('import-btn').style.display = 'flex';
   }
 
   await loadPlaces();
@@ -487,6 +556,111 @@ async function deletePlace(id) {
 async function signOut() {
   await _supabase.auth.signOut();
   window.location.href = '../index.html';
+}
+
+// ── Google Maps Import ──
+let parsedPlaces = [];
+
+function openImportModal() {
+  document.getElementById('import-overlay').classList.add('open');
+  parsedPlaces = [];
+  document.getElementById('import-results').style.display = 'none';
+  document.getElementById('import-results').innerHTML = '';
+  document.getElementById('import-save-btn').disabled = true;
+  document.getElementById('import-drop').classList.remove('dragover');
+}
+
+function closeImportModal() {
+  document.getElementById('import-overlay').classList.remove('open');
+  document.getElementById('file-input').value = '';
+}
+
+function handleImportOverlayClick(e) {
+  if (e.target === document.getElementById('import-overlay')) closeImportModal();
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) parseGoogleTakeoutFile(file);
+}
+
+// Drag and drop
+const dropZone = document.getElementById('import-drop');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) parseGoogleTakeoutFile(file);
+});
+
+function parseGoogleTakeoutFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const json = JSON.parse(e.target.result);
+      const features = json.features || [];
+
+      parsedPlaces = features
+        .filter(f => f.properties?.Title || f.properties?.Location?.['Business Name'])
+        .map(f => {
+          const props = f.properties;
+          const loc = props.Location || {};
+          const name = props.Title || loc['Business Name'] || '';
+          const address = loc.Address || '';
+          const city = extractCity(address);
+          const note = props['Google Maps URL'] || '';
+          return { user_id: currentUser.id, name, category: 'Other', city, note };
+        })
+        .filter(p => p.name);
+
+      const resultsEl = document.getElementById('import-results');
+      if (parsedPlaces.length === 0) {
+        resultsEl.innerHTML = '<strong>No places found.</strong> Make sure you uploaded the correct Saved Places.json file.';
+        document.getElementById('import-save-btn').disabled = true;
+      } else {
+        resultsEl.innerHTML = `Found <strong>${parsedPlaces.length} place${parsedPlaces.length !== 1 ? 's' : ''}</strong> ready to import. All will be added as category "Other" — you can edit them after.`;
+        document.getElementById('import-save-btn').disabled = false;
+      }
+      resultsEl.style.display = 'block';
+    } catch {
+      const resultsEl = document.getElementById('import-results');
+      resultsEl.innerHTML = '<strong>Could not read file.</strong> Please make sure it\'s the Saved Places.json from Google Takeout.';
+      resultsEl.style.display = 'block';
+      document.getElementById('import-save-btn').disabled = true;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function extractCity(address) {
+  if (!address) return '';
+  const parts = address.split(',').map(s => s.trim());
+  // Address format: "Street, City, State ZIP, Country"
+  // City is usually the second-to-last or third-to-last part
+  if (parts.length >= 3) return parts[parts.length - 3].replace(/\s+\d+.*/, '').trim();
+  if (parts.length === 2) return parts[0];
+  return '';
+}
+
+async function runImport() {
+  if (!parsedPlaces.length) return;
+  const btn = document.getElementById('import-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+
+  const { error } = await _supabase.from('places').insert(parsedPlaces);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Import Places';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+
+  closeImportModal();
+  await loadPlaces();
 }
 
 init();

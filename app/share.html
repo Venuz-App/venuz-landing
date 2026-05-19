@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save to VenuZ</title>
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#0F0E0B;
+  --terracotta:#D85A30;
+  --terracotta-light:#F0A882;
+  --warm-white:#FDFBF8;
+  --muted:#9A9488;
+  --border:rgba(255,255,255,0.1);
+}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--charcoal);
+  color:var(--warm-white);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  position:relative;overflow:hidden;
+}
+.glow{
+  position:fixed;width:500px;height:500px;
+  background:radial-gradient(circle,rgba(216,90,48,0.12) 0%,transparent 70%);
+  top:-150px;right:-150px;pointer-events:none;
+}
+.card{
+  width:100%;max-width:420px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:40px 36px;
+  position:relative;z-index:1;
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+  display:block;margin-bottom:28px;
+}
+.logo span{color:var(--terracotta)}
+.card-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:300;
+  margin-bottom:6px;line-height:1.2;
+}
+.card-sub{
+  font-size:10px;color:var(--muted);
+  letter-spacing:0.3px;line-height:1.7;
+  margin-bottom:28px;
+}
+.shared-preview{
+  background:rgba(216,90,48,0.06);
+  border:1px solid rgba(216,90,48,0.15);
+  border-radius:8px;
+  padding:12px 14px;
+  margin-bottom:20px;
+  font-size:11px;color:rgba(253,251,248,0.5);
+  line-height:1.6;word-break:break-all;
+}
+.shared-preview strong{display:block;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--terracotta);margin-bottom:4px;}
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:9px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:8px;outline:none;
+  color:var(--warm-white);
+  font-family:'Montserrat',sans-serif;
+  font-size:12px;transition:border-color 0.2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(216,90,48,0.5)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,0.2)}
+.field select option{background:#1a1916}
+.field textarea{resize:vertical;min-height:72px;line-height:1.6}
+.btn{
+  width:100%;padding:14px;margin-top:6px;
+  background:var(--terracotta);border:none;
+  border-radius:8px;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.btn:hover{background:#C04E28}
+.btn:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
+.skip{
+  display:block;text-align:center;margin-top:16px;
+  font-size:10px;color:var(--muted);text-decoration:none;
+}
+.skip:hover{color:var(--warm-white)}
+.success-screen{display:none;text-align:center}
+.success-icon{font-size:44px;margin-bottom:20px}
+.success-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:300;margin-bottom:10px;
+}
+.success-sub{font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:24px}
+@media(max-width:480px){.card{padding:32px 20px}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="card">
+  <a href="../index.html" class="logo">V<span>e</span>nuZ</a>
+
+  <div id="save-form">
+    <div class="card-title">Save a Place</div>
+    <p class="card-sub">Shared from another app — fill in the details below.</p>
+
+    <div class="shared-preview" id="shared-preview" style="display:none">
+      <strong>Shared content</strong>
+      <span id="shared-content-text"></span>
+    </div>
+
+    <div class="field">
+      <label>Place Name *</label>
+      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+    </div>
+    <div class="field">
+      <label>Category *</label>
+      <select id="place-category">
+        <option value="">Select a category</option>
+        <option>Restaurant</option>
+        <option>Bar</option>
+        <option>Spa</option>
+        <option>Hotel</option>
+        <option>Beach</option>
+        <option>Market</option>
+        <option>Lounge</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="place-city" placeholder="e.g. New York, Accra"/>
+    </div>
+    <div class="field">
+      <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <textarea id="place-note" placeholder="Why do you want to go?"></textarea>
+    </div>
+
+    <button class="btn" id="save-btn" onclick="savePlace()">Save to Wishlist</button>
+    <a href="dashboard.html" class="skip">Skip — go to my wishlist</a>
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">📍</div>
+    <div class="success-title">Saved!</div>
+    <p class="success-sub">Added to your wishlist.</p>
+    <a href="dashboard.html" class="btn" style="display:inline-block;text-decoration:none;padding:14px 32px;width:auto;">View Wishlist</a>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+let currentUser = null;
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  currentUser = session.user;
+
+  // Beta check — redirect non-beta users to dashboard
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (profile?.role !== 'beta') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Parse shared content from URL params
+  const params = new URLSearchParams(window.location.search);
+  const sharedTitle = params.get('title') || '';
+  const sharedText = params.get('text') || '';
+  const sharedUrl = params.get('url') || '';
+
+  const sharedContent = sharedTitle || sharedText || sharedUrl;
+
+  if (sharedContent) {
+    document.getElementById('shared-preview').style.display = 'block';
+    document.getElementById('shared-content-text').textContent = sharedContent;
+    // Pre-fill name with the title if we have one
+    if (sharedTitle) document.getElementById('place-name').value = sharedTitle;
+    // Store URL in note if present
+    if (sharedUrl && !sharedTitle) document.getElementById('place-name').value = sharedUrl;
+    if (sharedUrl && sharedTitle) document.getElementById('place-note').value = sharedUrl;
+  }
+}
+
+async function savePlace() {
+  const name = document.getElementById('place-name').value.trim();
+  const category = document.getElementById('place-category').value;
+  const city = document.getElementById('place-city').value.trim();
+  const note = document.getElementById('place-note').value.trim();
+  const btn = document.getElementById('save-btn');
+
+  if (!name) { document.getElementById('place-name').focus(); return; }
+  if (!category) { document.getElementById('place-category').focus(); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const record = { user_id: currentUser.id, name, category };
+  if (city) record.city = city;
+  if (note) record.note = note;
+
+  const { error } = await _supabase.from('places').insert([record]);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Save to Wishlist';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+
+  document.getElementById('save-form').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>
