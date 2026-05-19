@@ -34,6 +34,8 @@ body{
   background:radial-gradient(circle,rgba(216,90,48,0.12) 0%,transparent 70%);
   top:-150px;right:-150px;pointer-events:none;
 }
+
+/* ── card shared ── */
 .card{
   width:100%;max-width:420px;
   background:rgba(255,255,255,0.03);
@@ -49,6 +51,13 @@ body{
   display:block;margin-bottom:28px;
 }
 .logo span{color:var(--terracotta)}
+
+/* ── save form ── */
+.shared-label{
+  font-size:9px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--terracotta);
+  margin-bottom:6px;display:block;
+}
 .card-title{
   font-family:'Cormorant Garamond',serif;
   font-size:28px;font-weight:300;
@@ -59,16 +68,6 @@ body{
   letter-spacing:0.3px;line-height:1.7;
   margin-bottom:28px;
 }
-.shared-preview{
-  background:rgba(216,90,48,0.06);
-  border:1px solid rgba(216,90,48,0.15);
-  border-radius:8px;
-  padding:12px 14px;
-  margin-bottom:20px;
-  font-size:11px;color:rgba(253,251,248,0.5);
-  line-height:1.6;word-break:break-all;
-}
-.shared-preview strong{display:block;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--terracotta);margin-bottom:4px;}
 .field{margin-bottom:14px}
 .field label{
   display:block;font-size:9px;font-weight:600;
@@ -95,7 +94,8 @@ body{
   font-family:'Montserrat',sans-serif;
   font-size:10px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;cursor:pointer;
-  transition:background 0.2s;
+  transition:background 0.2s;display:block;
+  text-align:center;text-decoration:none;
 }
 .btn:hover{background:#C04E28}
 .btn:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
@@ -104,6 +104,8 @@ body{
   font-size:10px;color:var(--muted);text-decoration:none;
 }
 .skip:hover{color:var(--warm-white)}
+
+/* ── success state ── */
 .success-screen{display:none;text-align:center}
 .success-icon{font-size:44px;margin-bottom:20px}
 .success-title{
@@ -111,23 +113,85 @@ body{
   font-size:28px;font-weight:300;margin-bottom:10px;
 }
 .success-sub{font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:24px}
-@media(max-width:480px){.card{padding:32px 20px}}
+.success-link{
+  display:inline-block;color:var(--terracotta);
+  font-size:11px;font-weight:600;
+  text-decoration:none;letter-spacing:0.5px;
+}
+.success-link:hover{color:var(--terracotta-light)}
+
+/* ── how-to guide ── */
+.guide-page{display:none;width:100%;max-width:480px;position:relative;z-index:1}
+.guide-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+  display:block;margin-bottom:32px;
+}
+.guide-logo span{color:var(--terracotta)}
+.guide-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:34px;font-weight:300;line-height:1.1;
+  margin-bottom:12px;
+}
+.guide-sub{
+  font-size:12px;color:var(--muted);line-height:1.8;
+  margin-bottom:32px;
+}
+.guide-sources{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.guide-source-card{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:18px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+}
+.guide-source-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.guide-source-body{}
+.guide-source-name{
+  font-size:12px;font-weight:600;font-family:'Montserrat',sans-serif;
+  margin-bottom:4px;
+}
+.guide-source-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.guide-note{
+  font-size:10px;color:var(--muted);line-height:1.7;
+  margin-bottom:6px;
+}
+.guide-homescreen-link{
+  font-size:10px;font-weight:600;letter-spacing:0.5px;
+  color:var(--terracotta);text-decoration:none;
+  display:inline-block;margin-bottom:24px;
+}
+.guide-homescreen-link:hover{color:var(--terracotta-light)}
+.guide-cta{
+  width:100%;padding:14px;
+  background:var(--terracotta);border:none;
+  border-radius:8px;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;display:block;
+  text-align:center;text-decoration:none;
+}
+.guide-cta:hover{background:#C04E28}
+
+@media(max-width:480px){
+  .card{padding:32px 20px}
+  .guide-headline{font-size:28px}
+}
 </style>
 </head>
 <body>
 <div class="glow"></div>
 
-<div class="card">
+<!-- Save form (shown when shared content is present) -->
+<div class="card" id="save-card" style="display:none">
   <a href="../index.html" class="logo">V<span>e</span>nuZ</a>
 
   <div id="save-form">
+    <span class="shared-label">Shared from another app</span>
     <div class="card-title">Save a Place</div>
-    <p class="card-sub">Shared from another app — fill in the details below.</p>
-
-    <div class="shared-preview" id="shared-preview" style="display:none">
-      <strong>Shared content</strong>
-      <span id="shared-content-text"></span>
-    </div>
+    <p class="card-sub">Fill in the details below and we'll add it to your wishlist.</p>
 
     <div class="field">
       <label>Place Name *</label>
@@ -164,8 +228,53 @@ body{
     <div class="success-icon">📍</div>
     <div class="success-title">Saved!</div>
     <p class="success-sub">Added to your wishlist.</p>
-    <a href="dashboard.html" class="btn" style="display:inline-block;text-decoration:none;padding:14px 32px;width:auto;">View Wishlist</a>
+    <a href="dashboard.html" class="success-link">View my wishlist →</a>
   </div>
+</div>
+
+<!-- How-to guide (shown when navigated to directly with no params) -->
+<div class="guide-page" id="guide-page">
+  <a href="../index.html" class="guide-logo">V<span>e</span>nuZ</a>
+
+  <h1 class="guide-headline">Share places directly to VenuZ</h1>
+  <p class="guide-sub">Once VenuZ is on your home screen, you can share any place straight to your wishlist from any app.</p>
+
+  <div class="guide-sources">
+    <div class="guide-source-card">
+      <div class="guide-source-icon">🗺️</div>
+      <div class="guide-source-body">
+        <div class="guide-source-name">Google Maps</div>
+        <div class="guide-source-desc">Find a place → tap Share → choose VenuZ from the share sheet</div>
+      </div>
+    </div>
+    <div class="guide-source-card">
+      <div class="guide-source-icon">📸</div>
+      <div class="guide-source-body">
+        <div class="guide-source-name">Instagram</div>
+        <div class="guide-source-desc">See a tagged restaurant or bar → tap ··· → Share → VenuZ</div>
+      </div>
+    </div>
+    <div class="guide-source-card">
+      <div class="guide-source-icon">🎵</div>
+      <div class="guide-source-body">
+        <div class="guide-source-name">TikTok</div>
+        <div class="guide-source-desc">Spot a place in a video → tap Share → More → VenuZ</div>
+      </div>
+    </div>
+    <div class="guide-source-card">
+      <div class="guide-source-icon">🧭</div>
+      <div class="guide-source-body">
+        <div class="guide-source-name">Safari</div>
+        <div class="guide-source-desc">Visit any restaurant or venue page → tap the share icon → VenuZ</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="guide-note">Don't see VenuZ in your share sheet? Make sure it's added to your home screen first.</p>
+  <a href="dashboard.html" class="guide-homescreen-link">Add to home screen →</a>
+  <p class="guide-note" style="font-size:9px;margin-bottom:20px;color:rgba(154,148,136,0.6)">On iOS: open VenuZ in Safari → tap the share icon → "Add to Home Screen"</p>
+
+  <a href="dashboard.html" class="guide-cta">Go to my wishlist →</a>
 </div>
 
 <script>
@@ -183,7 +292,7 @@ async function init() {
 
   currentUser = session.user;
 
-  // Beta check — redirect non-beta users to dashboard
+  // Beta check
   const { data: profile } = await _supabase
     .from('profiles')
     .select('role')
@@ -195,36 +304,49 @@ async function init() {
     return;
   }
 
-  // Parse shared content from URL params
+  // Determine mode based on URL params
   const params = new URLSearchParams(window.location.search);
   const sharedTitle = params.get('title') || '';
-  const sharedText = params.get('text') || '';
-  const sharedUrl = params.get('url') || '';
+  const sharedText  = params.get('text')  || '';
+  const sharedUrl   = params.get('url')   || '';
+  const hasParams   = sharedTitle || sharedText || sharedUrl;
 
-  const sharedContent = sharedTitle || sharedText || sharedUrl;
+  if (hasParams) {
+    showSaveForm(sharedTitle, sharedText, sharedUrl);
+  } else {
+    document.getElementById('guide-page').style.display = 'block';
+  }
+}
 
-  if (sharedContent) {
-    document.getElementById('shared-preview').style.display = 'block';
-    document.getElementById('shared-content-text').textContent = sharedContent;
-    // Pre-fill name with the title if we have one
-    if (sharedTitle) document.getElementById('place-name').value = sharedTitle;
-    // Store URL in note if present
-    if (sharedUrl && !sharedTitle) document.getElementById('place-name').value = sharedUrl;
-    if (sharedUrl && sharedTitle) document.getElementById('place-note').value = sharedUrl;
+function showSaveForm(title, text, url) {
+  document.getElementById('save-card').style.display = 'block';
+
+  // Pre-fill place name
+  if (title) {
+    document.getElementById('place-name').value = title;
+  } else if (text) {
+    // Clean text: truncate at 60 chars
+    const cleaned = text.replace(/https?:\/\/\S+/g, '').trim().slice(0, 60);
+    if (cleaned) document.getElementById('place-name').value = cleaned;
+  }
+
+  // Pre-fill note with URL if present
+  if (url) {
+    document.getElementById('place-note').value = url;
   }
 }
 
 async function savePlace() {
-  const name = document.getElementById('place-name').value.trim();
+  const name     = document.getElementById('place-name').value.trim();
   const category = document.getElementById('place-category').value;
-  const city = document.getElementById('place-city').value.trim();
-  const note = document.getElementById('place-note').value.trim();
-  const btn = document.getElementById('save-btn');
+  const city     = document.getElementById('place-city').value.trim();
+  const note     = document.getElementById('place-note').value.trim();
+  const btn      = document.getElementById('save-btn');
 
-  if (!name) { document.getElementById('place-name').focus(); return; }
+  if (!name)     { document.getElementById('place-name').focus(); return; }
   if (!category) { document.getElementById('place-category').focus(); return; }
 
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Saving…';
 
   const record = { user_id: currentUser.id, name, category };
@@ -234,13 +356,13 @@ async function savePlace() {
   const { error } = await _supabase.from('places').insert([record]);
 
   if (error) {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Save to Wishlist';
     alert('Something went wrong. Please try again.');
     return;
   }
 
-  document.getElementById('save-form').style.display = 'none';
+  document.getElementById('save-form').style.display   = 'none';
   document.getElementById('success-screen').style.display = 'block';
 }
 

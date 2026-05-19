@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -258,30 +257,6 @@ main{
 }
 .import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
 
-/* ── import modal ── */
-.import-drop{
-  border:2px dashed rgba(216,90,48,0.3);
-  border-radius:10px;
-  padding:36px 20px;
-  text-align:center;
-  cursor:pointer;
-  transition:border-color 0.2s,background 0.2s;
-  margin-bottom:20px;
-}
-.import-drop:hover,.import-drop.dragover{
-  border-color:var(--terracotta);
-  background:rgba(216,90,48,0.05);
-}
-.import-drop-icon{font-size:32px;margin-bottom:12px}
-.import-drop-title{font-size:12px;font-weight:500;margin-bottom:6px}
-.import-drop-sub{font-size:10px;color:var(--muted);line-height:1.7}
-.import-drop-sub a{color:var(--terracotta);text-decoration:none}
-.import-results{
-  font-size:11px;color:rgba(255,255,255,0.6);
-  line-height:1.8;margin-bottom:16px;
-  display:none;
-}
-.import-results strong{color:var(--warm-white)}
 
 @media(max-width:600px){
   nav{padding:0 20px}
@@ -306,14 +281,14 @@ main{
   <!-- Beta banner (shown to beta users only) -->
   <div class="beta-banner" id="beta-banner">
     <div class="beta-banner-text">
-      <strong>You're a beta user.</strong> More features coming soon — Google Maps import, share from Instagram & TikTok, and Friends Feed.
+      <strong>You're a beta user.</strong> Import your Google Maps saves and share places from any app directly to your wishlist.
     </div>
   </div>
 
   <div class="page-header">
     <h1 class="page-title">My Wishlist</h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="import-btn" id="import-btn" onclick="openImportModal()">↑ Import Google Maps</button>
+      <button class="import-btn" id="import-btn" onclick="window.location.href='import.html'">↑ Import Google Maps</button>
       <button class="add-btn" onclick="openModal()">+ Save a Place</button>
     </div>
   </div>
@@ -377,32 +352,6 @@ main{
   </div>
 </div>
 
-<!-- Import Modal (beta only) -->
-<div class="overlay" id="import-overlay" onclick="handleImportOverlayClick(event)">
-  <div class="modal">
-    <div class="modal-title">Import from Google Maps</div>
-    <p style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:20px;">
-      Export your saved places from Google Maps via
-      <a href="https://takeout.google.com" target="_blank" style="color:var(--terracotta);text-decoration:none;">Google Takeout</a>.
-      Select <strong style="color:rgba(253,251,248,0.7)">Maps (your places)</strong>, download the zip, then upload the
-      <strong style="color:rgba(253,251,248,0.7)">Saved Places.json</strong> file below.
-    </p>
-
-    <div class="import-drop" id="import-drop" onclick="document.getElementById('file-input').click()">
-      <div class="import-drop-icon">📂</div>
-      <div class="import-drop-title">Drop your Google Takeout zip here</div>
-      <div class="import-drop-sub">or click to browse — accepts .zip or .json</div>
-      <input type="file" id="file-input" accept=".zip,.json" style="display:none" onchange="handleFileSelect(event)">
-    </div>
-
-    <div class="import-results" id="import-results"></div>
-
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeImportModal()">Cancel</button>
-      <button class="modal-save" id="import-save-btn" onclick="runImport()" disabled>Import Places</button>
-    </div>
-  </div>
-</div>
 
 <script>
 const { createClient } = supabase;
@@ -559,126 +508,6 @@ async function signOut() {
   window.location.href = '../index.html';
 }
 
-// ── Google Maps Import ──
-let parsedPlaces = [];
-
-function openImportModal() {
-  document.getElementById('import-overlay').classList.add('open');
-  parsedPlaces = [];
-  document.getElementById('import-results').style.display = 'none';
-  document.getElementById('import-results').innerHTML = '';
-  document.getElementById('import-save-btn').disabled = true;
-  document.getElementById('import-drop').classList.remove('dragover');
-}
-
-function closeImportModal() {
-  document.getElementById('import-overlay').classList.remove('open');
-  document.getElementById('file-input').value = '';
-}
-
-function handleImportOverlayClick(e) {
-  if (e.target === document.getElementById('import-overlay')) closeImportModal();
-}
-
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (file) parseGoogleTakeoutFile(file);
-}
-
-// Drag and drop
-const dropZone = document.getElementById('import-drop');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) parseGoogleTakeoutFile(file);
-});
-
-async function parseGoogleTakeoutFile(file) {
-  try {
-    let jsonText;
-
-    if (file.name.endsWith('.zip')) {
-      const zip = await JSZip.loadAsync(file);
-      // Find Saved Places.json anywhere in the zip
-      const entry = Object.values(zip.files).find(f =>
-        f.name.toLowerCase().includes('saved places') && f.name.endsWith('.json')
-      );
-      if (!entry) {
-        showImportError('Could not find "Saved Places.json" inside the zip. Make sure you selected Maps when exporting from Google Takeout.');
-        return;
-      }
-      jsonText = await entry.async('text');
-    } else {
-      jsonText = await file.text();
-    }
-
-    const json = JSON.parse(jsonText);
-    const features = json.features || [];
-
-    parsedPlaces = features
-      .filter(f => f.properties?.Title || f.properties?.Location?.['Business Name'])
-      .map(f => {
-        const props = f.properties;
-        const loc = props.Location || {};
-        const name = props.Title || loc['Business Name'] || '';
-        const address = loc.Address || '';
-        const city = extractCity(address);
-        const note = props['Google Maps URL'] || '';
-        return { user_id: currentUser.id, name, category: 'Other', city, note };
-      })
-      .filter(p => p.name);
-
-    const resultsEl = document.getElementById('import-results');
-    if (parsedPlaces.length === 0) {
-      showImportError('No places found. Make sure you selected Maps (your places) when exporting from Google Takeout.');
-    } else {
-      resultsEl.innerHTML = `Found <strong>${parsedPlaces.length} place${parsedPlaces.length !== 1 ? 's' : ''}</strong> ready to import. All will be added as "Other" — you can edit categories after.`;
-      resultsEl.style.display = 'block';
-      document.getElementById('import-save-btn').disabled = false;
-    }
-  } catch {
-    showImportError('Could not read the file. Please try again with your Google Takeout zip or Saved Places.json.');
-  }
-}
-
-function showImportError(msg) {
-  const resultsEl = document.getElementById('import-results');
-  resultsEl.innerHTML = `<strong>Error:</strong> ${msg}`;
-  resultsEl.style.display = 'block';
-  document.getElementById('import-save-btn').disabled = true;
-}
-
-function extractCity(address) {
-  if (!address) return '';
-  const parts = address.split(',').map(s => s.trim());
-  // Address format: "Street, City, State ZIP, Country"
-  // City is usually the second-to-last or third-to-last part
-  if (parts.length >= 3) return parts[parts.length - 3].replace(/\s+\d+.*/, '').trim();
-  if (parts.length === 2) return parts[0];
-  return '';
-}
-
-async function runImport() {
-  if (!parsedPlaces.length) return;
-  const btn = document.getElementById('import-save-btn');
-  btn.disabled = true;
-  btn.textContent = 'Importing…';
-
-  const { error } = await _supabase.from('places').insert(parsedPlaces);
-
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Import Places';
-    alert('Something went wrong. Please try again.');
-    return;
-  }
-
-  closeImportModal();
-  await loadPlaces();
-}
 
 init();
 </script>

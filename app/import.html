@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import Places — VenuZ</title>
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#0F0E0B;
+  --terracotta:#D85A30;
+  --terracotta-light:#F0A882;
+  --warm-white:#FDFBF8;
+  --muted:#9A9488;
+  --border:rgba(255,255,255,0.08);
+  --card-bg:rgba(255,255,255,0.03);
+}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--charcoal);
+  color:var(--warm-white);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 24px 60px;
+}
+.glow{
+  position:fixed;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(216,90,48,0.10) 0%,transparent 70%);
+  top:-200px;right:-200px;pointer-events:none;z-index:0;
+}
+
+/* ── nav ── */
+nav{
+  width:100%;max-width:560px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 32px;position:relative;z-index:1;
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+}
+.nav-logo span{color:var(--terracotta)}
+.nav-back{
+  font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);
+  text-decoration:none;transition:color 0.2s;
+}
+.nav-back:hover{color:var(--warm-white)}
+
+/* ── progress dots ── */
+.progress{
+  display:flex;gap:8px;align-items:center;
+  margin-bottom:48px;position:relative;z-index:1;
+}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,0.12);
+  transition:background 0.3s;
+}
+.dot.active{background:var(--terracotta)}
+.dot.done{background:rgba(216,90,48,0.4)}
+
+/* ── step wrapper ── */
+.step{display:none;width:100%;max-width:560px;position:relative;z-index:1}
+.step.visible{display:block}
+
+/* ── step 1 ── */
+.step-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:40px;font-weight:300;line-height:1.1;
+  margin-bottom:16px;
+}
+.step-sub{
+  font-size:12px;color:var(--muted);line-height:1.8;
+  margin-bottom:40px;
+}
+
+/* ── buttons ── */
+.btn-primary{
+  display:block;width:100%;padding:16px;
+  background:var(--terracotta);border:none;
+  border-radius:10px;color:#fff;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;text-align:center;
+  text-decoration:none;
+}
+.btn-primary:hover{background:#C04E28}
+.btn-primary:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
+
+.btn-ghost{
+  display:block;width:100%;padding:14px;margin-top:12px;
+  background:none;border:none;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:500;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);
+  cursor:pointer;text-align:center;transition:color 0.2s;
+}
+.btn-ghost:hover{color:var(--warm-white)}
+
+/* ── guide cards ── */
+.guide-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;font-weight:300;
+  margin-bottom:28px;line-height:1.1;
+}
+.guide-cards{display:flex;flex-direction:column;gap:14px;margin-bottom:40px}
+.guide-card{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:20px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-left:2px solid var(--terracotta);
+  border-radius:10px;
+}
+.guide-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--terracotta);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#fff;
+  margin-top:1px;
+}
+.guide-card-body{flex:1}
+.guide-card-title{
+  font-size:13px;font-weight:600;font-family:'Montserrat',sans-serif;
+  margin-bottom:5px;
+}
+.guide-card-desc{font-size:11px;color:var(--muted);line-height:1.7}
+.guide-card-link{
+  display:inline-block;margin-top:8px;
+  font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--terracotta);
+  text-decoration:none;transition:color 0.2s;
+}
+.guide-card-link:hover{color:var(--terracotta-light)}
+
+/* ── upload / drop zone ── */
+.upload-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;font-weight:300;
+  margin-bottom:10px;line-height:1.1;
+}
+.upload-sub{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:28px}
+
+.drop-zone{
+  min-height:160px;
+  border:2px dashed rgba(216,90,48,0.35);
+  border-radius:12px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:10px;
+  cursor:pointer;
+  transition:border-color 0.2s,background 0.2s;
+  margin-bottom:16px;
+  padding:24px;
+  text-align:center;
+}
+.drop-zone:hover,.drop-zone.dragover{
+  border-color:var(--terracotta);
+  border-style:solid;
+  background:rgba(216,90,48,0.06);
+}
+.drop-zone-icon{font-size:32px;line-height:1}
+.drop-zone-text{font-size:13px;font-weight:500;color:rgba(253,251,248,0.8)}
+.drop-zone-hint{font-size:10px;color:var(--muted)}
+
+.upload-error{
+  display:none;
+  font-size:11px;color:rgba(216,90,48,0.85);
+  line-height:1.7;margin-bottom:16px;
+  padding:12px 16px;
+  background:rgba(216,90,48,0.06);
+  border:1px solid rgba(216,90,48,0.2);
+  border-radius:8px;
+}
+
+/* ── preview ── */
+.preview-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;font-weight:300;
+  margin-bottom:28px;line-height:1.1;
+}
+.source-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.source-card{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+}
+.source-card-name{font-size:12px;font-weight:500}
+.source-card-pill{
+  font-size:9px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;
+  padding:4px 12px;border-radius:999px;
+  background:rgba(216,90,48,0.12);
+  border:1px solid rgba(216,90,48,0.25);
+  color:var(--terracotta-light);
+}
+.categories-label{
+  font-size:9px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:12px;
+}
+.category-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.category-chip{
+  font-size:10px;font-weight:500;
+  padding:6px 14px;border-radius:999px;
+  border:1px solid rgba(216,90,48,0.35);
+  color:var(--terracotta-light);
+  background:rgba(216,90,48,0.05);
+}
+.preview-note{
+  font-size:10px;color:var(--muted);line-height:1.7;
+  margin-bottom:28px;
+  font-style:italic;
+}
+
+/* ── success ── */
+.success-wrap{text-align:center;padding:40px 0}
+.success-icon{font-size:56px;margin-bottom:24px;line-height:1}
+.success-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:38px;font-weight:300;margin-bottom:14px;
+}
+.success-sub{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:36px}
+
+@media(max-width:480px){
+  .step-headline{font-size:32px}
+  .guide-headline,.upload-headline,.preview-headline{font-size:26px}
+  .success-headline{font-size:30px}
+}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav>
+  <a href="../index.html" class="nav-logo">V<span>e</span>nuZ</a>
+  <a href="dashboard.html" class="nav-back">← My Wishlist</a>
+</nav>
+
+<!-- Progress dots -->
+<div class="progress" id="progress">
+  <div class="dot active" id="dot-1"></div>
+  <div class="dot" id="dot-2"></div>
+  <div class="dot" id="dot-3"></div>
+  <div class="dot" id="dot-4"></div>
+  <div class="dot" id="dot-5"></div>
+</div>
+
+<!-- Step 1: Intro -->
+<div class="step visible" id="step-1">
+  <h1 class="step-headline">Bring your saved places with you</h1>
+  <p class="step-sub">Import your Google Maps saves — no technical steps, just a few taps.</p>
+  <button class="btn-primary" onclick="goTo(2)">Get Started →</button>
+</div>
+
+<!-- Step 2: Guide -->
+<div class="step" id="step-2">
+  <h2 class="guide-headline">First, export from Google Maps</h2>
+  <div class="guide-cards">
+    <div class="guide-card">
+      <div class="guide-num">1</div>
+      <div class="guide-card-body">
+        <div class="guide-card-title">Open Google Takeout</div>
+        <div class="guide-card-desc">Go to takeout.google.com on your phone or computer.</div>
+        <a href="https://takeout.google.com" target="_blank" rel="noopener" class="guide-card-link">Open Takeout →</a>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-num">2</div>
+      <div class="guide-card-body">
+        <div class="guide-card-title">Select only Maps</div>
+        <div class="guide-card-desc">Tap "Deselect all" at the top, then check "Maps (your places)" only.</div>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-num">3</div>
+      <div class="guide-card-body">
+        <div class="guide-card-title">Start the export</div>
+        <div class="guide-card-desc">Tap "Next step" → "Create export". Google will email you a download link (usually within a few minutes).</div>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-num">4</div>
+      <div class="guide-card-body">
+        <div class="guide-card-title">Download your file</div>
+        <div class="guide-card-desc">Open Google's email, tap "Download your files", and save the file to your device.</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="goTo(3)">I have my file →</button>
+  <button class="btn-ghost" onclick="goTo(1)">← Back</button>
+</div>
+
+<!-- Step 3: Upload -->
+<div class="step" id="step-3">
+  <h2 class="upload-headline">Upload your file</h2>
+  <p class="upload-sub">Drop the file you downloaded from Google — we'll handle the rest.</p>
+
+  <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <div class="drop-zone-icon">📁</div>
+    <div class="drop-zone-text">Tap to select your file</div>
+    <div class="drop-zone-hint">or drop it here on desktop</div>
+    <input type="file" id="file-input" accept=".zip,.json" style="display:none" onchange="handleFileSelect(event)">
+  </div>
+
+  <div class="upload-error" id="upload-error"></div>
+
+  <button class="btn-ghost" onclick="goTo(2)">← Back</button>
+</div>
+
+<!-- Step 4: Preview -->
+<div class="step" id="step-4">
+  <h2 class="preview-headline">Here's what we found</h2>
+
+  <div class="source-cards" id="source-cards"></div>
+
+  <div class="categories-label">We organized your places into:</div>
+  <div class="category-chips" id="category-chips"></div>
+
+  <p class="preview-note">You can change any category from your wishlist after importing.</p>
+
+  <button class="btn-primary" id="import-btn" onclick="runImport()">Import places →</button>
+  <button class="btn-ghost" onclick="goTo(3)">← Back</button>
+</div>
+
+<!-- Step 5: Success -->
+<div class="step" id="step-5">
+  <div class="success-wrap">
+    <div class="success-icon">📍</div>
+    <h2 class="success-headline" id="success-headline">Places imported!</h2>
+    <p class="success-sub">Your Google Maps saves are now in your VenuZ wishlist.</p>
+    <a href="dashboard.html" class="btn-primary" style="display:inline-block;width:auto;padding:16px 40px;">View my wishlist →</a>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+let currentUser = null;
+let parsedSources = {}; // sourceLabel → [places]
+
+// ── Auth + beta guard ──
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  currentUser = session.user;
+
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (profile?.role !== 'beta') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+}
+
+// ── Step navigation ──
+let currentStep = 1;
+
+function goTo(n) {
+  document.getElementById('step-' + currentStep).classList.remove('visible');
+  currentStep = n;
+  document.getElementById('step-' + currentStep).classList.add('visible');
+  updateDots();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateDots() {
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.remove('active', 'done');
+    if (i === currentStep) dot.classList.add('active');
+    else if (i < currentStep) dot.classList.add('done');
+  }
+}
+
+// ── File handling ──
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) handleFile(file);
+}
+
+async function handleFile(file) {
+  hideError();
+  try {
+    const sources = await processFile(file);
+    const total = Object.values(sources).reduce((s, arr) => s + arr.length, 0);
+    if (total === 0) {
+      showError('We couldn\'t find any saved places in that file. Try downloading your file again from Google.');
+      return;
+    }
+    parsedSources = sources;
+    buildPreview(sources);
+    goTo(4);
+  } catch {
+    showError('Something went wrong reading that file. Please try again.');
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('upload-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  const el = document.getElementById('upload-error');
+  el.style.display = 'none';
+  el.textContent = '';
+}
+
+// ── Preview builder ──
+function buildPreview(sources) {
+  const allPlaces = Object.values(sources).flat();
+  const total = allPlaces.length;
+
+  // Source cards
+  const sourceCardsEl = document.getElementById('source-cards');
+  sourceCardsEl.innerHTML = '';
+  for (const [label, places] of Object.entries(sources)) {
+    if (places.length === 0) continue;
+    const card = document.createElement('div');
+    card.className = 'source-card';
+    card.innerHTML = `
+      <span class="source-card-name">${escHtml(label)}</span>
+      <span class="source-card-pill">${places.length} place${places.length !== 1 ? 's' : ''}</span>
+    `;
+    sourceCardsEl.appendChild(card);
+  }
+
+  // Category chips
+  const cats = {};
+  for (const p of allPlaces) {
+    cats[p.category] = (cats[p.category] || 0) + 1;
+  }
+  const chipsEl = document.getElementById('category-chips');
+  chipsEl.innerHTML = '';
+  for (const [cat, count] of Object.entries(cats)) {
+    if (count === 0) continue;
+    const chip = document.createElement('span');
+    chip.className = 'category-chip';
+    chip.textContent = `${cat} · ${count}`;
+    chipsEl.appendChild(chip);
+  }
+
+  // Import button label
+  document.getElementById('import-btn').textContent = `Import ${total} place${total !== 1 ? 's' : ''} →`;
+}
+
+// ── Import ──
+async function runImport() {
+  const allPlaces = Object.values(parsedSources).flat();
+  if (!allPlaces.length) return;
+
+  const btn = document.getElementById('import-btn');
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+
+  const records = allPlaces.map(p => ({
+    user_id: currentUser.id,
+    name: p.name,
+    category: p.category,
+    city: p.city || '',
+    note: p.note || ''
+  }));
+
+  const { error } = await _supabase.from('places').insert(records);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = `Import ${allPlaces.length} place${allPlaces.length !== 1 ? 's' : ''} →`;
+    showError('Something went wrong during the import. Please try again.');
+    goTo(3);
+    return;
+  }
+
+  document.getElementById('success-headline').textContent = `${allPlaces.length} place${allPlaces.length !== 1 ? 's' : ''} imported!`;
+  goTo(5);
+}
+
+// ── Helpers ──
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function categorize(name) {
+  const n = name.toLowerCase();
+  if (/restaurant|café|cafe|diner|grill|kitchen|bistro|brasserie|trattoria|pizzeria|sushi|ramen|noodle|burger|taco|bbq|steakhouse|eatery|cantina|chophouse|ristorante|osteria/.test(n)) return 'Restaurant';
+  if (/\bbar\b|pub|brewery|cocktail|speakeasy|distillery|taproom|beerhouse|wine bar/.test(n)) return 'Bar';
+  if (/hotel|inn|resort|motel|lodge|hostel|suites|marriott|hilton|hyatt|westin|sheraton|ritz|four seasons|mandarin|aman/.test(n)) return 'Hotel';
+  if (/\bspa\b|salon|massage|wellness|beauty|nail|aesthetics|facial|skincare/.test(n)) return 'Spa';
+  if (/beach|coast|shore|island|bay|cove|lagoon/.test(n)) return 'Beach';
+  if (/market|boutique|gallery|museum/.test(n)) return 'Market';
+  if (/lounge|nightclub/.test(n)) return 'Lounge';
+  return 'Other';
+}
+
+function extractCity(address) {
+  if (!address) return '';
+  const parts = address.split(',').map(s => s.trim());
+  if (parts.length >= 3) return parts[parts.length - 3].replace(/\s+\d+.*/, '').trim();
+  if (parts.length === 2) return parts[0];
+  return '';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (line[i] === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += line[i];
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function getSourceLabel(path) {
+  const base = path.split('/').pop().replace(/\.[^.]+$/, '').toLowerCase();
+  if (base.includes('saved')) return 'Saved Places';
+  if (base.includes('want')) return 'Want to Go';
+  if (base.includes('favorite')) return 'Favorites';
+  if (base.includes('starred')) return 'Starred Places';
+  if (base.includes('labeled')) return 'Labeled Places';
+  return 'Saved Places';
+}
+
+function parseGeoJSON(json, sourceLabel) {
+  return (json.features || [])
+    .map(f => {
+      const props = f.properties || {};
+      const loc = props.Location || {};
+      const name = props.Title || loc['Business Name'] || '';
+      if (!name) return null;
+      const address = loc.Address || '';
+      return {
+        name,
+        category: categorize(name),
+        city: extractCity(address),
+        note: props['Google Maps URL'] || '',
+        source: sourceLabel
+      };
+    })
+    .filter(Boolean);
+}
+
+function parseCSV(text, sourceLabel) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+  const titleIdx = headers.indexOf('title');
+  if (titleIdx === -1) return [];
+  const urlIdx = headers.indexOf('url');
+  return lines.slice(1).map(line => {
+    const cols = parseCSVLine(line);
+    const name = cols[titleIdx] || '';
+    if (!name) return null;
+    return {
+      name,
+      category: categorize(name),
+      city: '',
+      note: urlIdx >= 0 ? (cols[urlIdx] || '') : '',
+      source: sourceLabel
+    };
+  }).filter(Boolean);
+}
+
+async function processFile(file) {
+  const sources = {};
+
+  if (file.name.toLowerCase().endsWith('.zip')) {
+    const zip = await JSZip.loadAsync(file);
+    for (const [path, entry] of Object.entries(zip.files)) {
+      if (entry.dir) continue;
+      const fname = path.split('/').pop().toLowerCase();
+      if (fname.endsWith('.json')) {
+        try {
+          const text = await entry.async('text');
+          const json = JSON.parse(text);
+          if (json.features && Array.isArray(json.features)) {
+            const label = getSourceLabel(path);
+            const places = parseGeoJSON(json, label);
+            if (places.length > 0) {
+              if (!sources[label]) sources[label] = [];
+              sources[label].push(...places);
+            }
+          }
+        } catch {}
+      } else if (fname.endsWith('.csv')) {
+        try {
+          const text = await entry.async('text');
+          const label = getSourceLabel(path);
+          const places = parseCSV(text, label);
+          if (places.length > 0) {
+            if (!sources[label]) sources[label] = [];
+            sources[label].push(...places);
+          }
+        } catch {}
+      }
+    }
+  } else {
+    const text = await file.text();
+    const json = JSON.parse(text);
+    if (json.features && Array.isArray(json.features)) {
+      const places = parseGeoJSON(json, 'Saved Places');
+      if (places.length > 0) sources['Saved Places'] = places;
+    }
+  }
+
+  return sources;
+}
+
+init();
+</script>
+</body>
+</html>
