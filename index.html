@@ -78,6 +78,12 @@ nav{
 .nav-cta:hover{background:var(--terracotta);border-color:var(--terracotta)}
 .nav-cta.filled{background:var(--terracotta);border-color:var(--terracotta)}
 .nav-cta.filled:hover{background:#C04E28;border-color:#C04E28}
+.nav-signin{
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,0.5);
+  text-decoration:none;transition:color 0.2s;
+}
+.nav-signin:hover{color:var(--warm-white)}
 
 /* ─── HERO ─── */
 .hero{
@@ -660,7 +666,10 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
 <!-- NAV -->
 <nav>
   <div class="nav-logo">V<span>e</span>nuZ</div>
-  <a href="#waitlist" class="nav-cta">Join Waitlist</a>
+  <div class="nav-right">
+    <a href="/app/login.html" class="nav-signin" id="nav-signin">Sign In</a>
+    <a href="#waitlist" class="nav-cta" id="nav-join">Join Waitlist</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -1090,6 +1099,21 @@ async function requestCity() {
   document.getElementById('city-success').style.display = 'block';
 }
 document.getElementById('city-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') requestCity(); });
+
+// ── Nav: detect existing session ──
+(async () => {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (session) {
+    const signinLink = document.getElementById('nav-signin');
+    const joinBtn = document.getElementById('nav-join');
+    if (signinLink) {
+      signinLink.textContent = 'Open App →';
+      signinLink.href = '/app/dashboard.html';
+      signinLink.style.color = 'var(--terracotta)';
+    }
+    if (joinBtn) joinBtn.style.display = 'none';
+  }
+})();
 </script>
 </body>
 </html>
