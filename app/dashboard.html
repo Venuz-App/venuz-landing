@@ -373,13 +373,11 @@ async function init() {
   currentUser = session.user;
   document.getElementById('nav-email').textContent = currentUser.email;
 
-  const { data: profile, error: profileErr } = await _supabase
+  const { data: profile } = await _supabase
     .from('profiles')
     .select('role')
     .eq('id', currentUser.id)
     .single();
-
-  console.log('[dashboard] user:', currentUser.id, '| role:', profile?.role, '| error:', profileErr?.message);
 
   if (profile?.role === 'beta') {
     currentRole = 'beta';
