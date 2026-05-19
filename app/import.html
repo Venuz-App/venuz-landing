@@ -419,7 +419,8 @@ async function handleFile(file) {
     const sources = await processFile(file);
     const total = Object.values(sources).reduce((s, arr) => s + arr.length, 0);
     if (total === 0) {
-      showError('We couldn\'t find any saved places in that file. Try downloading your file again from Google.');
+      const hasOnlyBrowser = Object.keys(zip?.files || {}).some(f => f.includes('archive_browser'));
+      showError('No saved places found. Make sure you checked "Maps (your places)" — not just "Maps" — when exporting from Google Takeout, then re-export and try again.');
       return;
     }
     parsedSources = sources;
