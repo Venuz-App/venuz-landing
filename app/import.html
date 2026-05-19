@@ -365,12 +365,15 @@ async function init() {
 
   currentUser = session.user;
 
-  const { data: profile } = await _supabase
+  const { data: profile, error: profileError } = await _supabase
     .from('profiles')
     .select('role')
     .eq('id', currentUser.id)
     .single();
 
+  console.log('[import] user:', currentUser.email, '| role:', profile?.role, '| error:', profileError?.message);
+
+  if (profileError) return; // fetch failed — let them through rather than redirect
   if (profile?.role !== 'beta') {
     window.location.href = 'dashboard.html';
     return;
