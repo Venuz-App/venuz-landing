@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -389,9 +390,9 @@ main{
 
     <div class="import-drop" id="import-drop" onclick="document.getElementById('file-input').click()">
       <div class="import-drop-icon">📂</div>
-      <div class="import-drop-title">Drop your Saved Places.json here</div>
-      <div class="import-drop-sub">or click to browse</div>
-      <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileSelect(event)">
+      <div class="import-drop-title">Drop your Google Takeout zip here</div>
+      <div class="import-drop-sub">or click to browse — accepts .zip or .json</div>
+      <input type="file" id="file-input" accept=".zip,.json" style="display:none" onchange="handleFileSelect(event)">
     </div>
 
     <div class="import-results" id="import-results"></div>
@@ -595,43 +596,59 @@ dropZone.addEventListener('drop', e => {
   if (file) parseGoogleTakeoutFile(file);
 });
 
-function parseGoogleTakeoutFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const json = JSON.parse(e.target.result);
-      const features = json.features || [];
+async function parseGoogleTakeoutFile(file) {
+  try {
+    let jsonText;
 
-      parsedPlaces = features
-        .filter(f => f.properties?.Title || f.properties?.Location?.['Business Name'])
-        .map(f => {
-          const props = f.properties;
-          const loc = props.Location || {};
-          const name = props.Title || loc['Business Name'] || '';
-          const address = loc.Address || '';
-          const city = extractCity(address);
-          const note = props['Google Maps URL'] || '';
-          return { user_id: currentUser.id, name, category: 'Other', city, note };
-        })
-        .filter(p => p.name);
-
-      const resultsEl = document.getElementById('import-results');
-      if (parsedPlaces.length === 0) {
-        resultsEl.innerHTML = '<strong>No places found.</strong> Make sure you uploaded the correct Saved Places.json file.';
-        document.getElementById('import-save-btn').disabled = true;
-      } else {
-        resultsEl.innerHTML = `Found <strong>${parsedPlaces.length} place${parsedPlaces.length !== 1 ? 's' : ''}</strong> ready to import. All will be added as category "Other" — you can edit them after.`;
-        document.getElementById('import-save-btn').disabled = false;
+    if (file.name.endsWith('.zip')) {
+      const zip = await JSZip.loadAsync(file);
+      // Find Saved Places.json anywhere in the zip
+      const entry = Object.values(zip.files).find(f =>
+        f.name.toLowerCase().includes('saved places') && f.name.endsWith('.json')
+      );
+      if (!entry) {
+        showImportError('Could not find "Saved Places.json" inside the zip. Make sure you selected Maps when exporting from Google Takeout.');
+        return;
       }
-      resultsEl.style.display = 'block';
-    } catch {
-      const resultsEl = document.getElementById('import-results');
-      resultsEl.innerHTML = '<strong>Could not read file.</strong> Please make sure it\'s the Saved Places.json from Google Takeout.';
-      resultsEl.style.display = 'block';
-      document.getElementById('import-save-btn').disabled = true;
+      jsonText = await entry.async('text');
+    } else {
+      jsonText = await file.text();
     }
-  };
-  reader.readAsText(file);
+
+    const json = JSON.parse(jsonText);
+    const features = json.features || [];
+
+    parsedPlaces = features
+      .filter(f => f.properties?.Title || f.properties?.Location?.['Business Name'])
+      .map(f => {
+        const props = f.properties;
+        const loc = props.Location || {};
+        const name = props.Title || loc['Business Name'] || '';
+        const address = loc.Address || '';
+        const city = extractCity(address);
+        const note = props['Google Maps URL'] || '';
+        return { user_id: currentUser.id, name, category: 'Other', city, note };
+      })
+      .filter(p => p.name);
+
+    const resultsEl = document.getElementById('import-results');
+    if (parsedPlaces.length === 0) {
+      showImportError('No places found. Make sure you selected Maps (your places) when exporting from Google Takeout.');
+    } else {
+      resultsEl.innerHTML = `Found <strong>${parsedPlaces.length} place${parsedPlaces.length !== 1 ? 's' : ''}</strong> ready to import. All will be added as "Other" — you can edit categories after.`;
+      resultsEl.style.display = 'block';
+      document.getElementById('import-save-btn').disabled = false;
+    }
+  } catch {
+    showImportError('Could not read the file. Please try again with your Google Takeout zip or Saved Places.json.');
+  }
+}
+
+function showImportError(msg) {
+  const resultsEl = document.getElementById('import-results');
+  resultsEl.innerHTML = `<strong>Error:</strong> ${msg}`;
+  resultsEl.style.display = 'block';
+  document.getElementById('import-save-btn').disabled = true;
 }
 
 function extractCity(address) {
