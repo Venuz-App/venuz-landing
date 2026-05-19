@@ -357,7 +357,11 @@ let parsedSources = {}; // sourceLabel → [places]
 // ── Auth + beta guard ──
 async function init() {
   const { data: { session } } = await _supabase.auth.getSession();
-  if (!session) { window.location.href = 'login.html'; return; }
+  if (!session) {
+    sessionStorage.setItem('venuz_after_login', 'import.html');
+    window.location.href = 'login.html';
+    return;
+  }
 
   currentUser = session.user;
 

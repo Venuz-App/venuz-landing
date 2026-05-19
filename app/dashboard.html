@@ -384,6 +384,13 @@ async function init() {
     document.getElementById('beta-badge').style.display = 'block';
     document.getElementById('beta-banner').style.display = 'flex';
     document.getElementById('import-btn').style.display = 'flex';
+
+    const redirect = sessionStorage.getItem('venuz_after_login');
+    if (redirect) {
+      sessionStorage.removeItem('venuz_after_login');
+      window.location.href = redirect;
+      return;
+    }
   }
 
   await loadPlaces();
