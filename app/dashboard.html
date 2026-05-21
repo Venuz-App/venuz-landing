@@ -143,6 +143,23 @@ main{
 }
 .visit-btn.unmark:hover{background:rgba(240,168,130,0.2)}
 
+/* ── edit button ── */
+.edit-btn{
+  flex-shrink:0;
+  font-size:9px;font-weight:600;letter-spacing:0.8px;
+  text-transform:uppercase;
+  padding:6px 12px;border-radius:999px;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+  background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.35);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.edit-btn:hover{
+  background:rgba(255,255,255,0.08);
+  color:var(--warm-white);
+  border-color:rgba(255,255,255,0.2);
+}
+
 /* ── filters ── */
 .filters{
   display:flex;gap:8px;flex-wrap:wrap;
@@ -364,7 +381,7 @@ main{
   <a href="dashboard.html" class="nav-logo">V<span>e</span>nuZ</a>
   <div class="nav-right">
     <span class="beta-badge" id="beta-badge">Beta</span>
-    <span class="nav-email" id="nav-email"></span>
+    <a href="profile.html" class="nav-email" id="nav-email" style="text-decoration:none;color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='var(--warm-white)'" onmouseout="this.style.color='var(--muted)'"></a>
     <button class="nav-signout" onclick="signOut()">Sign out</button>
   </div>
 </nav>
@@ -445,6 +462,10 @@ main{
       <input type="text" id="place-city" placeholder="e.g. New York, Accra"/>
     </div>
     <div class="field">
+      <label>Address <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="place-address" placeholder="e.g. 181 Thompson St, New York"/>
+    </div>
+    <div class="field">
       <label>Price Range <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <select id="place-price">
         <option value="">Select price range</option>
@@ -502,6 +523,10 @@ main{
       <input type="text" id="link-city" placeholder="e.g. New York, Accra"/>
     </div>
     <div class="field">
+      <label>Address <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="link-address" placeholder="e.g. 181 Thompson St, New York"/>
+    </div>
+    <div class="field">
       <label>Price Range <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <select id="link-price">
         <option value="">Select price range</option>
@@ -522,6 +547,62 @@ main{
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeLinkModal()">Cancel</button>
       <button class="modal-save" id="link-save-btn" onclick="saveLinkPlace()">Save Place</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Place Modal -->
+<div class="overlay" id="edit-overlay" onclick="handleEditOverlayClick(event)">
+  <div class="modal">
+    <input type="hidden" id="edit-id"/>
+    <div class="modal-title">Edit Place</div>
+    <div class="field">
+      <label>Place Name *</label>
+      <input type="text" id="edit-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+    </div>
+    <div class="field">
+      <label>Category *</label>
+      <select id="edit-category">
+        <option value="">Select a category</option>
+        <option>Restaurant</option>
+        <option>Bar</option>
+        <option>Spa</option>
+        <option>Hotel</option>
+        <option>Beach</option>
+        <option>Market</option>
+        <option>Lounge</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="edit-city" placeholder="e.g. New York, Accra"/>
+    </div>
+    <div class="field">
+      <label>Address <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="edit-address" placeholder="e.g. 181 Thompson St, New York"/>
+    </div>
+    <div class="field">
+      <label>Price Range <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <select id="edit-price">
+        <option value="">Select price range</option>
+        <option value="$">$ — Under $15</option>
+        <option value="$$">$$ — $15–$30</option>
+        <option value="$$$">$$$ — $30–$60</option>
+        <option value="$$$$">$$$$ — $60+</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Hours <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="edit-hours" placeholder="e.g. Mon–Fri 12pm–10pm"/>
+    </div>
+    <div class="field">
+      <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <textarea id="edit-note" placeholder="Why do you want to go? Any details worth remembering…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="modal-save" id="edit-save-btn" onclick="updatePlace()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -660,6 +741,8 @@ function placeCard(p) {
     ? `<button class="visit-btn unmark" onclick="toggleVisited('${p.id}', 'visited')">Undo</button>`
     : `<button class="visit-btn mark" onclick="toggleVisited('${p.id}', 'want_to_go')">✓ Been here</button>`;
 
+  const safeId = escHtml(p.id);
+
   return `
     <div class="place-card${isVisited ? ' visited' : ''}">
       <div class="place-info">
@@ -669,13 +752,15 @@ function placeCard(p) {
           ${p.price_range ? `<span class="place-city" style="color:var(--terracotta-light)">${escHtml(p.price_range)}</span>` : ''}
           ${p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : ''}
         </div>
+        ${p.address ? `<div class="place-note" style="color:rgba(255,255,255,0.35);font-size:9px">${escHtml(p.address)}</div>` : ''}
         ${p.hours ? `<div class="place-note" style="color:var(--muted)">🕐 ${escHtml(p.hours)}</div>` : ''}
         ${visitedLabel}
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         ${visitBtn}
-        <button class="place-delete" onclick="deletePlace('${p.id}')" title="Remove">✕</button>
+        <button class="edit-btn" onclick="openEditModal('${safeId}')">Edit</button>
+        <button class="place-delete" onclick="deletePlace('${safeId}')" title="Remove">✕</button>
       </div>
     </div>`;
 }
@@ -698,11 +783,9 @@ function openModal() {
 }
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
-  document.getElementById('place-name').value = '';
+  ['place-name','place-city','place-address','place-note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('place-category').value = '';
-  document.getElementById('place-city').value = '';
   document.getElementById('place-price').value = '';
-  document.getElementById('place-note').value = '';
   document.getElementById('save-btn').disabled = false;
   document.getElementById('save-btn').textContent = 'Save Place';
 }
@@ -723,11 +806,13 @@ async function savePlace() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
-  const price = document.getElementById('place-price').value;
+  const price   = document.getElementById('place-price').value;
+  const address = document.getElementById('place-address').value.trim();
   const record = { user_id: currentUser.id, name, category };
-  if (city)  record.city = city;
-  if (price) record.price_range = price;
-  if (note)  record.note = note;
+  if (city)    record.city = city;
+  if (address) record.address = address;
+  if (price)   record.price_range = price;
+  if (note)    record.note = note;
 
   const { error } = await _supabase.from('places').insert([record]);
 
@@ -779,7 +864,7 @@ function openLinkModal() {
 }
 function closeLinkModal() {
   document.getElementById('link-overlay').classList.remove('open');
-  ['link-url','link-name','link-city','link-price','link-hours','link-note'].forEach(id => document.getElementById(id).value = '');
+  ['link-url','link-name','link-city','link-address','link-price','link-hours','link-note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('link-category').value = '';
   document.getElementById('extract-status').style.display = 'none';
   document.getElementById('link-save-btn').disabled = false;
@@ -819,6 +904,7 @@ async function extractFromLink() {
       if (place.name)        document.getElementById('link-name').value = place.name;
       if (place.place_type)  document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
       if (place.city)        document.getElementById('link-city').value = place.city;
+      if (place.address)     document.getElementById('link-address').value = place.address;
       if (place.price_range) document.getElementById('link-price').value = place.price_range;
       if (place.hours)       document.getElementById('link-hours').value = place.hours;
       if (!document.getElementById('link-note').value) document.getElementById('link-note').value = url;
@@ -847,13 +933,15 @@ async function saveLinkPlace() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
-  const price = document.getElementById('link-price').value;
-  const hours = document.getElementById('link-hours').value.trim();
+  const price   = document.getElementById('link-price').value;
+  const hours   = document.getElementById('link-hours').value.trim();
+  const address = document.getElementById('link-address').value.trim();
   const record = { user_id: currentUser.id, name, category };
-  if (city)  record.city = city;
-  if (price) record.price_range = price;
-  if (hours) record.hours = hours;
-  if (note)  record.note = note;
+  if (city)    record.city = city;
+  if (address) record.address = address;
+  if (price)   record.price_range = price;
+  if (hours)   record.hours = hours;
+  if (note)    record.note = note;
 
   const { error } = await _supabase.from('places').insert([record]);
 
@@ -865,6 +953,68 @@ async function saveLinkPlace() {
   }
 
   closeLinkModal();
+  await loadPlaces();
+}
+
+// ── Edit place ──
+function openEditModal(id) {
+  const p = allPlaces.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = p.name || '';
+  document.getElementById('edit-category').value = p.category || '';
+  document.getElementById('edit-city').value = p.city || '';
+  document.getElementById('edit-address').value = p.address || '';
+  document.getElementById('edit-price').value = p.price_range || '';
+  document.getElementById('edit-hours').value = p.hours || '';
+  document.getElementById('edit-note').value = p.note || '';
+  document.getElementById('edit-save-btn').disabled = false;
+  document.getElementById('edit-save-btn').textContent = 'Save Changes';
+  document.getElementById('edit-overlay').classList.add('open');
+  document.getElementById('edit-name').focus();
+}
+function closeEditModal() {
+  document.getElementById('edit-overlay').classList.remove('open');
+}
+function handleEditOverlayClick(e) {
+  if (e.target === document.getElementById('edit-overlay')) closeEditModal();
+}
+async function updatePlace() {
+  const id       = document.getElementById('edit-id').value;
+  const name     = document.getElementById('edit-name').value.trim();
+  const category = document.getElementById('edit-category').value;
+  const btn      = document.getElementById('edit-save-btn');
+
+  if (!name)     { document.getElementById('edit-name').focus(); return; }
+  if (!category) { document.getElementById('edit-category').focus(); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const update = {
+    name,
+    category,
+    city:        document.getElementById('edit-city').value.trim()    || null,
+    address:     document.getElementById('edit-address').value.trim() || null,
+    price_range: document.getElementById('edit-price').value          || null,
+    hours:       document.getElementById('edit-hours').value.trim()   || null,
+    note:        document.getElementById('edit-note').value.trim()    || null,
+  };
+
+  const { error } = await _supabase
+    .from('places')
+    .update(update)
+    .eq('id', id)
+    .eq('user_id', currentUser.id);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+
+  closeEditModal();
   await loadPlaces();
 }
 
