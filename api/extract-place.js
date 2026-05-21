@@ -83,9 +83,13 @@ Return ONLY valid JSON with these exact fields:
   "place_type": "Restaurant|Bar|Spa|Beach|Market|Hotel|Lounge|Other",
   "city": "City name or null",
   "country": "Country or null",
+  "price_range": "$|$$|$$$|$$$$|null",
+  "hours": "Brief hours summary e.g. Mon-Fri 12pm-10pm, Sat-Sun 11am-11pm or null",
   "vibe_tags": ["tag1", "tag2"],
   "confidence": "high|medium|low"
 }
+For price_range: $ = under $15, $$ = $15-$30, $$$ = $30-$60, $$$$ = $60+. Extract from page description symbols or text clues.
+For hours: extract open/close times if present in the page content. Keep it brief.
 If no place is found, return: null`,
         messages: [{ role: 'user', content: context }]
       })

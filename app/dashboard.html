@@ -445,6 +445,16 @@ main{
       <input type="text" id="place-city" placeholder="e.g. New York, Accra"/>
     </div>
     <div class="field">
+      <label>Price Range <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <select id="place-price">
+        <option value="">Select price range</option>
+        <option value="$">$ — Under $15</option>
+        <option value="$$">$$ — $15–$30</option>
+        <option value="$$$">$$$ — $30–$60</option>
+        <option value="$$$$">$$$$ — $60+</option>
+      </select>
+    </div>
+    <div class="field">
       <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <textarea id="place-note" placeholder="Why do you want to go? Any details worth remembering…"></textarea>
     </div>
@@ -490,6 +500,20 @@ main{
     <div class="field">
       <label>City</label>
       <input type="text" id="link-city" placeholder="e.g. New York, Accra"/>
+    </div>
+    <div class="field">
+      <label>Price Range <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <select id="link-price">
+        <option value="">Select price range</option>
+        <option value="$">$ — Under $15</option>
+        <option value="$$">$$ — $15–$30</option>
+        <option value="$$$">$$$ — $30–$60</option>
+        <option value="$$$$">$$$$ — $60+</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Hours <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="link-hours" placeholder="e.g. Mon–Fri 12pm–10pm"/>
     </div>
     <div class="field">
       <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
@@ -642,8 +666,10 @@ function placeCard(p) {
         <div class="place-name">${escHtml(p.name)}</div>
         <div class="place-meta">
           ${p.category ? `<span class="place-category">${escHtml(p.category)}</span>` : ''}
+          ${p.price_range ? `<span class="place-city" style="color:var(--terracotta-light)">${escHtml(p.price_range)}</span>` : ''}
           ${p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : ''}
         </div>
+        ${p.hours ? `<div class="place-note" style="color:var(--muted)">🕐 ${escHtml(p.hours)}</div>` : ''}
         ${visitedLabel}
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
       </div>
@@ -675,6 +701,7 @@ function closeModal() {
   document.getElementById('place-name').value = '';
   document.getElementById('place-category').value = '';
   document.getElementById('place-city').value = '';
+  document.getElementById('place-price').value = '';
   document.getElementById('place-note').value = '';
   document.getElementById('save-btn').disabled = false;
   document.getElementById('save-btn').textContent = 'Save Place';
@@ -696,9 +723,11 @@ async function savePlace() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
+  const price = document.getElementById('place-price').value;
   const record = { user_id: currentUser.id, name, category };
-  if (city) record.city = city;
-  if (note) record.note = note;
+  if (city)  record.city = city;
+  if (price) record.price_range = price;
+  if (note)  record.note = note;
 
   const { error } = await _supabase.from('places').insert([record]);
 
@@ -750,7 +779,7 @@ function openLinkModal() {
 }
 function closeLinkModal() {
   document.getElementById('link-overlay').classList.remove('open');
-  ['link-url','link-name','link-city','link-note'].forEach(id => document.getElementById(id).value = '');
+  ['link-url','link-name','link-city','link-price','link-hours','link-note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('link-category').value = '';
   document.getElementById('extract-status').style.display = 'none';
   document.getElementById('link-save-btn').disabled = false;
@@ -787,10 +816,11 @@ async function extractFromLink() {
     const { place } = await res.json();
 
     if (place) {
-      if (place.name) document.getElementById('link-name').value = place.name;
-      if (place.place_type) document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
-      if (place.city) document.getElementById('link-city').value = place.city;
-      // Store URL as note if no note yet
+      if (place.name)        document.getElementById('link-name').value = place.name;
+      if (place.place_type)  document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
+      if (place.city)        document.getElementById('link-city').value = place.city;
+      if (place.price_range) document.getElementById('link-price').value = place.price_range;
+      if (place.hours)       document.getElementById('link-hours').value = place.hours;
       if (!document.getElementById('link-note').value) document.getElementById('link-note').value = url;
       status.textContent = '✦ Details extracted — review and save.';
     } else {
@@ -817,9 +847,13 @@ async function saveLinkPlace() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
+  const price = document.getElementById('link-price').value;
+  const hours = document.getElementById('link-hours').value.trim();
   const record = { user_id: currentUser.id, name, category };
-  if (city) record.city = city;
-  if (note) record.note = note;
+  if (city)  record.city = city;
+  if (price) record.price_range = price;
+  if (hours) record.hours = hours;
+  if (note)  record.note = note;
 
   const { error } = await _supabase.from('places').insert([record]);
 
