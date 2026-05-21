@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signing in — VenuZ</title>
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#0F0E0B;
+  --terracotta:#D85A30;
+  --terracotta-light:#F0A882;
+  --warm-white:#FDFBF8;
+  --muted:#9A9488;
+  --border:rgba(255,255,255,0.1);
+}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--charcoal);
+  color:var(--warm-white);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px 24px;
+  position:relative;overflow:hidden;
+}
+.glow{
+  position:fixed;width:500px;height:500px;
+  background:radial-gradient(circle,rgba(216,90,48,0.12) 0%,transparent 70%);
+  top:-150px;right:-150px;pointer-events:none;
+}
+.card{
+  width:100%;max-width:380px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:48px 40px;
+  position:relative;z-index:1;
+  text-align:center;
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:400;letter-spacing:1px;
+  color:var(--warm-white);text-decoration:none;
+  display:block;margin-bottom:40px;
+}
+.logo span{color:var(--terracotta)}
+.icon{font-size:48px;margin-bottom:20px;display:block}
+.title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px;font-weight:300;
+  margin-bottom:12px;line-height:1.2;
+}
+.sub{
+  font-size:11px;color:var(--muted);
+  line-height:1.8;margin-bottom:32px;
+}
+.sub strong{color:var(--warm-white);font-weight:500}
+
+/* Steps */
+.steps{
+  display:flex;flex-direction:column;gap:14px;
+  text-align:left;margin-bottom:32px;
+}
+.step{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px;
+}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--terracotta);
+  color:#fff;font-size:10px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.step-text{font-size:11px;color:rgba(255,255,255,0.7);line-height:1.5}
+
+.loading{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  color:var(--muted);font-size:11px;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--terracotta);
+  animation:pulse 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+.error{
+  font-size:11px;color:var(--terracotta-light);
+  line-height:1.7;
+}
+.retry{
+  display:inline-block;margin-top:16px;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  color:var(--terracotta);text-decoration:none;
+  text-transform:uppercase;
+}
+@media(max-width:480px){.card{padding:36px 24px}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="card">
+  <a href="../index.html" class="logo">V<span>e</span>nuZ</a>
+
+  <!-- Loading state -->
+  <div id="state-loading">
+    <div class="loading">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- Success state (shown after auth) -->
+  <div id="state-success" style="display:none">
+    <span class="icon">✓</span>
+    <div class="title">You're signed in</div>
+    <p class="sub">To open VenuZ, <strong>go back to your home screen</strong> and tap the VenuZ icon.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Press your phone's <strong>home button</strong> or swipe up to go home</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Find the <strong>VenuZ</strong> icon on your home screen and tap it</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">You'll be signed in automatically — no link needed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div id="state-error" style="display:none">
+    <span class="icon">⚠️</span>
+    <div class="title">Link expired</div>
+    <p class="error">Magic links expire after 1 hour. Request a new one to sign in.</p>
+    <a href="login.html" class="retry">Request new link →</a>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  'https://xjkrplonwfexigkudhmo.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqa3JwbG9ud2ZleGlna3VkaG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTM0NDgsImV4cCI6MjA5NDE4OTQ0OH0.31xr-_HMj5xU3lYvubZMxaKAskJ6g0AUM8w4tYPoI6A'
+);
+
+function setCookie(name, value) {
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+}
+
+function show(id) {
+  ['state-loading','state-success','state-error'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function handleSession(session) {
+  if (!session) { show('state-error'); return; }
+  // Store tokens in cookies — shared between Safari and the PWA on iOS
+  setCookie('venuz_at', session.access_token);
+  setCookie('venuz_rt', session.refresh_token);
+  show('state-success');
+}
+
+async function init() {
+  // If already in the PWA (standalone), just go to dashboard — no cookie needed
+  const isStandalone = window.navigator.standalone ||
+    window.matchMedia('(display-mode: standalone)').matches;
+  if (isStandalone) {
+    window.location.replace('dashboard.html');
+    return;
+  }
+
+  // Wait for Supabase to process the PKCE code from the URL automatically
+  _supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') handleSession(session);
+  });
+
+  // Also check if session already exists (e.g. page refresh)
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (session) handleSession(session);
+
+  // Timeout fallback — if no session after 8s, show error
+  setTimeout(() => {
+    const loading = document.getElementById('state-loading');
+    if (loading.style.display !== 'none') show('state-error');
+  }, 8000);
+}
+
+init();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
+</body>
+</html>
