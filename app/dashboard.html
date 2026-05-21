@@ -331,6 +331,15 @@ main{
 }
 .import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
 
+/* ── star rating ── */
+.star-picker{display:flex;gap:10px;margin:4px 0 8px}
+.star{font-size:32px;cursor:pointer;color:rgba(255,255,255,0.15);transition:color 0.15s;line-height:1;user-select:none}
+.star.lit{color:#F5C518}
+.user-rating-row{display:flex;align-items:center;gap:4px;margin-top:6px}
+.user-star{font-size:13px;color:#F5C518}
+.user-star.empty{color:rgba(255,255,255,0.15)}
+.user-review-text{font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px;line-height:1.5;font-style:italic}
+
 /* ── save from link btn ── */
 .link-btn{
   display:flex;align-items:center;gap:8px;
@@ -544,6 +553,7 @@ main{
       <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <textarea id="link-note" placeholder="Why do you want to go?"></textarea>
     </div>
+    <input type="hidden" id="link-grating"/>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeLinkModal()">Cancel</button>
       <button class="modal-save" id="link-save-btn" onclick="saveLinkPlace()">Save Place</button>
@@ -603,6 +613,32 @@ main{
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
       <button class="modal-save" id="edit-save-btn" onclick="updatePlace()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rate & Review Modal -->
+<div class="overlay" id="review-overlay" onclick="handleReviewOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">How was it?</div>
+    <input type="hidden" id="review-place-id"/>
+    <div class="field">
+      <label>Your Rating <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <div class="star-picker" id="star-picker">
+        <span class="star" onclick="setRating(1)" onmouseover="hoverStars(1)" onmouseout="hoverStars(0)">★</span>
+        <span class="star" onclick="setRating(2)" onmouseover="hoverStars(2)" onmouseout="hoverStars(0)">★</span>
+        <span class="star" onclick="setRating(3)" onmouseover="hoverStars(3)" onmouseout="hoverStars(0)">★</span>
+        <span class="star" onclick="setRating(4)" onmouseover="hoverStars(4)" onmouseout="hoverStars(0)">★</span>
+        <span class="star" onclick="setRating(5)" onmouseover="hoverStars(5)" onmouseout="hoverStars(0)">★</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Your Notes <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <textarea id="review-notes" placeholder="Vibe, standout dish, would you go back?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="skipReview()">Skip</button>
+      <button class="modal-save" onclick="saveReview()">Save Review</button>
     </div>
   </div>
 </div>
@@ -743,6 +779,15 @@ function placeCard(p) {
 
   const safeId = escHtml(p.id);
 
+  const starsHtml = p.user_rating
+    ? `<div class="user-rating-row">${[1,2,3,4,5].map(i => `<span class="user-star${i <= p.user_rating ? '' : ' empty'}">★</span>`).join('')}</div>`
+    : p.google_rating
+      ? `<div class="user-rating-row"><span style="font-size:10px;color:var(--muted)">Google</span> <span style="font-size:11px;color:#F5C518">★</span> <span style="font-size:10px;color:var(--muted)">${p.google_rating}</span></div>`
+      : '';
+  const reviewHtml = p.user_notes
+    ? `<div class="user-review-text">"${escHtml(p.user_notes)}"</div>`
+    : '';
+
   return `
     <div class="place-card${isVisited ? ' visited' : ''}">
       <div class="place-info">
@@ -755,6 +800,8 @@ function placeCard(p) {
         ${p.address ? `<div class="place-note" style="color:rgba(255,255,255,0.35);font-size:9px">${escHtml(p.address)}</div>` : ''}
         ${p.hours ? `<div class="place-note" style="color:var(--muted)">🕐 ${escHtml(p.hours)}</div>` : ''}
         ${visitedLabel}
+        ${starsHtml}
+        ${reviewHtml}
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -837,17 +884,66 @@ function switchStatus(status, btn) {
 
 // ── Toggle visited ──
 async function toggleVisited(id, currentStatus) {
-  const newStatus = currentStatus === 'want_to_go' ? 'visited' : 'want_to_go';
-  const update = { status: newStatus };
-  if (newStatus === 'visited') update.visited_at = new Date().toISOString();
-  else update.visited_at = null;
-
+  if (currentStatus === 'want_to_go') {
+    openReviewModal(id);
+    return;
+  }
+  // Undo visited — clear rating/notes
   const { error } = await _supabase
     .from('places')
-    .update(update)
+    .update({ status: 'want_to_go', visited_at: null, user_rating: null, user_notes: null })
     .eq('id', id)
     .eq('user_id', currentUser.id);
+  if (!error) await loadPlaces();
+}
 
+// ── Rate & Review modal ──
+let selectedRating = 0;
+let reviewPlaceId = null;
+
+function openReviewModal(id) {
+  reviewPlaceId = id;
+  selectedRating = 0;
+  document.getElementById('review-notes').value = '';
+  updateStarDisplay(0);
+  document.getElementById('review-overlay').classList.add('open');
+}
+function closeReviewModal() {
+  document.getElementById('review-overlay').classList.remove('open');
+  reviewPlaceId = null;
+  selectedRating = 0;
+}
+function handleReviewOverlayClick(e) {
+  if (e.target === document.getElementById('review-overlay')) closeReviewModal();
+}
+function setRating(val) {
+  selectedRating = val;
+  updateStarDisplay(val);
+}
+function hoverStars(val) {
+  const stars = document.querySelectorAll('#star-picker .star');
+  stars.forEach((s, i) => s.classList.toggle('lit', i < (val || selectedRating)));
+}
+function updateStarDisplay(val) {
+  document.querySelectorAll('#star-picker .star').forEach((s, i) => s.classList.toggle('lit', i < val));
+}
+async function saveReview() {
+  const id = reviewPlaceId;
+  const notes = document.getElementById('review-notes').value.trim();
+  const update = { status: 'visited', visited_at: new Date().toISOString() };
+  if (selectedRating > 0) update.user_rating = selectedRating;
+  if (notes) update.user_notes = notes;
+  const { error } = await _supabase.from('places').update(update).eq('id', id).eq('user_id', currentUser.id);
+  closeReviewModal();
+  if (!error) await loadPlaces();
+}
+async function skipReview() {
+  const id = reviewPlaceId;
+  const { error } = await _supabase
+    .from('places')
+    .update({ status: 'visited', visited_at: new Date().toISOString() })
+    .eq('id', id).eq('user_id', currentUser.id);
+  closeReviewModal();
   if (!error) await loadPlaces();
 }
 
@@ -866,6 +962,7 @@ function closeLinkModal() {
   document.getElementById('link-overlay').classList.remove('open');
   ['link-url','link-name','link-city','link-address','link-price','link-hours','link-note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('link-category').value = '';
+  document.getElementById('link-grating').value = '';
   document.getElementById('extract-status').style.display = 'none';
   document.getElementById('link-save-btn').disabled = false;
   document.getElementById('link-save-btn').textContent = 'Save Place';
@@ -901,12 +998,13 @@ async function extractFromLink() {
     const { place } = await res.json();
 
     if (place) {
-      if (place.name)        document.getElementById('link-name').value = place.name;
-      if (place.place_type)  document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
-      if (place.city)        document.getElementById('link-city').value = place.city;
-      if (place.address)     document.getElementById('link-address').value = place.address;
-      if (place.price_range) document.getElementById('link-price').value = place.price_range;
-      if (place.hours)       document.getElementById('link-hours').value = place.hours;
+      if (place.name)         document.getElementById('link-name').value = place.name;
+      if (place.place_type)   document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
+      if (place.city)         document.getElementById('link-city').value = place.city;
+      if (place.address)      document.getElementById('link-address').value = place.address;
+      if (place.price_range)  document.getElementById('link-price').value = place.price_range;
+      if (place.hours)        document.getElementById('link-hours').value = place.hours;
+      if (place.google_rating) document.getElementById('link-grating').value = place.google_rating;
       if (!document.getElementById('link-note').value) document.getElementById('link-note').value = url;
       status.textContent = '✦ Details extracted — review and save.';
     } else {
@@ -936,12 +1034,14 @@ async function saveLinkPlace() {
   const price   = document.getElementById('link-price').value;
   const hours   = document.getElementById('link-hours').value.trim();
   const address = document.getElementById('link-address').value.trim();
+  const grating = parseFloat(document.getElementById('link-grating').value);
   const record = { user_id: currentUser.id, name, category };
-  if (city)    record.city = city;
-  if (address) record.address = address;
-  if (price)   record.price_range = price;
-  if (hours)   record.hours = hours;
-  if (note)    record.note = note;
+  if (city)          record.city = city;
+  if (address)       record.address = address;
+  if (price)         record.price_range = price;
+  if (hours)         record.hours = hours;
+  if (note)          record.note = note;
+  if (!isNaN(grating)) record.google_rating = grating;
 
   const { error } = await _supabase.from('places').insert([record]);
 
