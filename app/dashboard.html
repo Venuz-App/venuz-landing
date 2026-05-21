@@ -383,6 +383,90 @@ main{
 .user-star.empty{color:rgba(255,255,255,0.15)}
 .user-review-text{font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px;line-height:1.5;font-style:italic}
 
+/* ── place detail modal ── */
+.detail-modal{padding:0;overflow:hidden;max-width:500px}
+.detail-map-wrap{
+  position:relative;width:100%;height:220px;
+  background:rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  overflow:hidden;
+}
+.detail-map-wrap iframe{width:100%;height:100%;border:0;display:block}
+.detail-map-placeholder{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:8px;color:var(--muted);font-size:11px;
+}
+.detail-map-placeholder .map-icon{font-size:32px;opacity:0.4}
+.detail-close{
+  position:absolute;top:12px;right:12px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(15,14,11,0.8);backdrop-filter:blur(4px);
+  border:none;color:var(--warm-white);font-size:16px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s;
+}
+.detail-close:hover{background:rgba(15,14,11,0.95)}
+.detail-body{padding:28px 32px 32px}
+.detail-name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.detail-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:300;line-height:1.2;flex:1;
+}
+.source-btn{
+  flex-shrink:0;display:flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:999px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--muted);font-family:'Montserrat',sans-serif;
+  font-size:9px;font-weight:600;letter-spacing:0.8px;
+  text-transform:uppercase;text-decoration:none;
+  transition:all 0.2s;white-space:nowrap;cursor:pointer;
+}
+.source-btn:hover{border-color:rgba(255,255,255,0.25);color:var(--warm-white)}
+.detail-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.detail-row{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:11px;color:rgba(255,255,255,0.55);
+  line-height:1.6;margin-bottom:8px;
+}
+.detail-row strong{color:var(--warm-white);font-weight:500}
+.detail-divider{height:1px;background:rgba(255,255,255,0.06);margin:16px 0}
+.detail-actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.detail-visit-btn{
+  flex:1;padding:11px 16px;border-radius:8px;border:none;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+}
+.detail-visit-btn.mark{background:var(--terracotta);color:#fff}
+.detail-visit-btn.mark:hover{background:#C04E28}
+.detail-visit-btn.unmark{
+  background:rgba(240,168,130,0.1);color:var(--terracotta-light);
+  border:1px solid rgba(240,168,130,0.3);
+}
+.detail-edit-btn{
+  padding:11px 18px;border-radius:8px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--muted);font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+}
+.detail-edit-btn:hover{border-color:rgba(255,255,255,0.25);color:var(--warm-white)}
+
+/* ── source icon on card ── */
+.source-icon-btn{
+  flex-shrink:0;width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.3);font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;transition:all 0.2s;cursor:pointer;
+}
+.source-icon-btn:hover{background:rgba(255,255,255,0.09);color:var(--warm-white)}
+
 /* ── save from link btn ── */
 .link-btn{
   display:flex;align-items:center;gap:8px;
@@ -687,6 +771,31 @@ main{
   </div>
 </div>
 
+<!-- Place Detail Modal -->
+<div class="overlay" id="detail-overlay" onclick="handleDetailOverlayClick(event)">
+  <div class="modal detail-modal">
+    <div class="detail-map-wrap" id="detail-map-wrap">
+      <button class="detail-close" onclick="closeDetailModal()">✕</button>
+      <div class="detail-map-placeholder" id="detail-map-placeholder">
+        <div class="map-icon">🗺</div>
+        <span>Loading map…</span>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-name-row">
+        <div class="detail-title" id="detail-title"></div>
+        <a class="source-btn" id="detail-source-btn" target="_blank" rel="noopener" style="display:none">↗ Source</a>
+      </div>
+      <div class="detail-meta-row" id="detail-meta-row"></div>
+      <div id="detail-rows"></div>
+      <div class="detail-actions">
+        <button class="detail-visit-btn" id="detail-visit-btn"></button>
+        <button class="detail-edit-btn" id="detail-edit-btn">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Rate & Review Modal -->
 <div class="overlay" id="review-overlay" onclick="handleReviewOverlayClick(event)">
   <div class="modal">
@@ -858,8 +967,13 @@ function placeCard(p) {
     ? `<div class="user-review-text">"${escHtml(p.user_notes)}"</div>`
     : '';
 
+  const sourceInfo = getSourceInfo(p.url);
+  const sourceIconHtml = p.url
+    ? `<a class="source-icon-btn" href="${escHtml(p.url)}" target="_blank" rel="noopener" title="Open ${sourceInfo.label}" onclick="event.stopPropagation()">${sourceInfo.icon}</a>`
+    : '';
+
   return `
-    <div class="place-card${isVisited ? ' visited' : ''}">
+    <div class="place-card${isVisited ? ' visited' : ''}" onclick="openDetailModal('${safeId}')" style="cursor:pointer">
       <div class="place-info">
         <div class="place-name">${escHtml(p.name)}</div>
         <div class="place-meta">
@@ -874,7 +988,8 @@ function placeCard(p) {
         ${reviewHtml}
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0" onclick="event.stopPropagation()">
+        ${sourceIconHtml}
         ${visitBtn}
         <button class="edit-btn" onclick="openEditModal('${safeId}')">Edit</button>
         <button class="place-delete" onclick="deletePlace('${safeId}')" title="Remove">✕</button>
@@ -922,6 +1037,107 @@ function closeMore() {
 document.addEventListener('click', e => {
   if (!document.getElementById('more-wrap').contains(e.target)) closeMore();
 });
+
+// ── Source info ──
+function getSourceInfo(url) {
+  if (!url) return { icon: '🔗', label: 'Source' };
+  if (/instagram\.com/.test(url))                              return { icon: '📷', label: 'Instagram' };
+  if (/tiktok\.com/.test(url))                                return { icon: '🎵', label: 'TikTok' };
+  if (/maps\.google|google\.com\/maps|maps\.app\.goo\.gl/.test(url)) return { icon: '📍', label: 'Google Maps' };
+  if (/yelp\.com/.test(url))                                  return { icon: '⭐', label: 'Yelp' };
+  if (/tripadvisor\.com/.test(url))                           return { icon: '🦉', label: 'TripAdvisor' };
+  return { icon: '🔗', label: 'Source' };
+}
+
+// ── Place Detail Modal ──
+let detailPlaceId = null;
+
+function getMapsEmbedUrl(p) {
+  if (p.lat && p.lng) return `https://maps.google.com/maps?q=${p.lat},${p.lng}&z=16&output=embed`;
+  const q = p.address ? `${p.name}, ${p.address}` : `${p.name}${p.city ? ', ' + p.city : ''}`;
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+}
+
+function openDetailModal(id) {
+  const p = allPlaces.find(x => x.id === id);
+  if (!p) return;
+  detailPlaceId = id;
+
+  // Title
+  document.getElementById('detail-title').textContent = p.name;
+
+  // Source button
+  const srcBtn = document.getElementById('detail-source-btn');
+  if (p.url) {
+    const info = getSourceInfo(p.url);
+    srcBtn.href = p.url;
+    srcBtn.textContent = `↗ ${info.label}`;
+    srcBtn.style.display = 'flex';
+  } else {
+    srcBtn.style.display = 'none';
+  }
+
+  // Meta row (category, price, city)
+  const metaParts = [
+    p.category ? `<span class="place-category">${escHtml(p.category)}</span>` : '',
+    p.price_range ? `<span style="font-size:10px;color:var(--terracotta-light)">${escHtml(p.price_range)}</span>` : '',
+    p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : '',
+  ].filter(Boolean);
+  document.getElementById('detail-meta-row').innerHTML = metaParts.join('');
+
+  // Detail rows
+  const rows = [
+    p.address ? `<div class="detail-row">📌 <span>${escHtml(p.address)}</span></div>` : '',
+    p.hours   ? `<div class="detail-row">🕐 <span>${escHtml(p.hours)}</span></div>` : '',
+    p.google_rating ? `<div class="detail-row">⭐ <span>Google rating: <strong>${p.google_rating}</strong></span></div>` : '',
+    p.user_rating ? `<div class="detail-row">${[1,2,3,4,5].map(i=>`<span style="color:${i<=p.user_rating?'#F5C518':'rgba(255,255,255,0.15)'}">★</span>`).join('')} <span style="font-size:10px;color:var(--muted)">Your rating</span></div>` : '',
+    p.user_notes ? `<div class="detail-row" style="font-style:italic;color:rgba(255,255,255,0.5)">"${escHtml(p.user_notes)}"</div>` : '',
+    p.note ? `<div class="detail-row">💬 <span>${escHtml(p.note)}</span></div>` : '',
+  ].filter(Boolean);
+  document.getElementById('detail-rows').innerHTML = rows.length
+    ? `<div class="detail-divider"></div>${rows.join('')}`
+    : '';
+
+  // Action buttons
+  const isVisited = p.status === 'visited';
+  const vBtn = document.getElementById('detail-visit-btn');
+  vBtn.className = `detail-visit-btn ${isVisited ? 'unmark' : 'mark'}`;
+  vBtn.textContent = isVisited ? 'Undo Visit' : '✓ Been here';
+  vBtn.onclick = () => { closeDetailModal(); toggleVisited(id, isVisited ? 'visited' : 'want_to_go'); };
+
+  document.getElementById('detail-edit-btn').onclick = () => { closeDetailModal(); openEditModal(id); };
+
+  // Map embed
+  const wrap = document.getElementById('detail-map-wrap');
+  // Remove any existing iframe
+  const existing = wrap.querySelector('iframe');
+  if (existing) existing.remove();
+  document.getElementById('detail-map-placeholder').style.display = 'flex';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = getMapsEmbedUrl(p);
+  iframe.allowFullscreen = true;
+  iframe.loading = 'lazy';
+  iframe.onload = () => { document.getElementById('detail-map-placeholder').style.display = 'none'; };
+  iframe.onerror = () => { document.getElementById('detail-map-placeholder').innerHTML = '<div class="map-icon">🗺</div><span>Map unavailable</span>'; };
+  wrap.appendChild(iframe);
+
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  // Stop the iframe to avoid background network activity
+  const wrap = document.getElementById('detail-map-wrap');
+  const iframe = wrap.querySelector('iframe');
+  if (iframe) { iframe.src = ''; iframe.remove(); }
+  document.getElementById('detail-map-placeholder').style.display = 'flex';
+  detailPlaceId = null;
+}
+
+function handleDetailOverlayClick(e) {
+  if (e.target === document.getElementById('detail-overlay')) closeDetailModal();
+}
 
 // ── Duplicate detection ──
 async function checkDuplicate(name) {
@@ -1148,7 +1364,6 @@ async function extractFromLink() {
       if (place.price_range)  document.getElementById('link-price').value = place.price_range;
       if (place.hours)        document.getElementById('link-hours').value = place.hours;
       if (place.google_rating) document.getElementById('link-grating').value = place.google_rating;
-      if (!document.getElementById('link-note').value) document.getElementById('link-note').value = url;
       status.textContent = '✦ Details extracted — review and save.';
     } else {
       status.textContent = 'Couldn\'t detect a place — fill in the details manually.';
@@ -1190,13 +1405,15 @@ async function saveLinkPlace(force = false) {
   const price   = document.getElementById('link-price').value;
   const hours   = document.getElementById('link-hours').value.trim();
   const address = document.getElementById('link-address').value.trim();
+  const linkUrl = document.getElementById('link-url').value.trim();
   const grating = parseFloat(document.getElementById('link-grating').value);
   const record = { user_id: currentUser.id, name, category };
-  if (city)          record.city = city;
-  if (address)       record.address = address;
-  if (price)         record.price_range = price;
-  if (hours)         record.hours = hours;
-  if (note)          record.note = note;
+  if (city)            record.city = city;
+  if (address)         record.address = address;
+  if (price)           record.price_range = price;
+  if (hours)           record.hours = hours;
+  if (note)            record.note = note;
+  if (linkUrl)         record.url = linkUrl;
   if (!isNaN(grating)) record.google_rating = grating;
 
   const { error } = await _supabase.from('places').insert([record]);
