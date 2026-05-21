@@ -19,7 +19,7 @@
   --muted:#9A9488;
   --border:rgba(255,255,255,0.08);
   --card-bg:rgba(255,255,255,0.03);
-  --green:rgba(75,165,90,1);
+  --green-text:#7dd87f;
   --green-bg:rgba(75,165,90,0.1);
   --green-border:rgba(75,165,90,0.3);
 }
@@ -43,16 +43,12 @@ nav{
   border:1px solid rgba(216,90,48,0.4);
   padding:4px 10px;border-radius:999px;display:none;
 }
-.nav-profile{
-  font-size:10px;color:var(--muted);text-decoration:none;
-  transition:color 0.2s;
-}
+.nav-profile{font-size:10px;color:var(--muted);text-decoration:none;transition:color 0.2s}
 .nav-profile:hover{color:var(--warm-white)}
 .nav-signout{
   font-size:9px;font-weight:600;letter-spacing:1px;
   text-transform:uppercase;color:var(--muted);
-  background:none;border:none;cursor:pointer;
-  transition:color 0.2s;padding:0;
+  background:none;border:none;cursor:pointer;transition:color 0.2s;padding:0;
 }
 .nav-signout:hover{color:var(--warm-white)}
 
@@ -65,6 +61,19 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   margin-bottom:28px;flex-wrap:wrap;gap:16px;
 }
 .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;line-height:1}
+.header-actions{display:flex;align-items:center;gap:10px}
+.import-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 18px;
+  background:none;
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:999px;color:var(--muted);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;
+}
+.import-btn:hover{border-color:rgba(255,255,255,0.3);color:var(--warm-white)}
 .add-btn{
   display:flex;align-items:center;gap:8px;
   padding:10px 20px;
@@ -80,22 +89,16 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 /* ── filters ── */
 .filter-section{margin-bottom:28px;display:flex;flex-direction:column;gap:10px}
 .filter-row{display:flex;gap:8px;flex-wrap:wrap}
-.filter-row-label{
-  font-size:8px;font-weight:600;letter-spacing:1.5px;
-  text-transform:uppercase;color:rgba(255,255,255,0.2);
-  align-self:center;white-space:nowrap;
-}
 .filter-btn{
   font-size:9px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;padding:6px 14px;
   border-radius:999px;border:1px solid var(--border);
-  background:none;color:var(--muted);cursor:pointer;
-  transition:all 0.2s;
+  background:none;color:var(--muted);cursor:pointer;transition:all 0.2s;
 }
 .filter-btn:hover{border-color:rgba(216,90,48,0.5);color:var(--terracotta);background:rgba(216,90,48,0.06)}
 .filter-btn.active{border-color:rgba(216,90,48,0.5);color:var(--terracotta);background:rgba(216,90,48,0.08)}
-.filter-btn.visited-active{border-color:var(--green-border);color:#7dd87f;background:var(--green-bg)}
-.filter-btn.visited-active:hover{border-color:rgba(75,165,90,0.5);color:#7dd87f}
+.filter-btn.visited-active{border-color:var(--green-border);color:var(--green-text);background:var(--green-bg)}
+.filter-btn.visited-active:hover{border-color:rgba(75,165,90,0.5)}
 
 /* ── empty state ── */
 .empty{text-align:center;padding:80px 24px}
@@ -111,8 +114,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   border-radius:12px;
   padding:18px 20px;
   display:flex;align-items:flex-start;justify-content:space-between;
-  gap:16px;
-  transition:border-color 0.2s;
+  gap:16px;transition:border-color 0.2s;
 }
 .place-card:hover{border-color:rgba(255,255,255,0.13)}
 .place-card.visited{border-color:var(--green-border)}
@@ -123,45 +125,50 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 .place-city{font-size:10px;color:var(--muted)}
 .visited-badge{
   font-size:8px;font-weight:600;letter-spacing:1.2px;
-  text-transform:uppercase;color:#7dd87f;
-  border:1px solid var(--green-border);
-  padding:2px 8px;border-radius:999px;
+  text-transform:uppercase;color:var(--green-text);
+  border:1px solid var(--green-border);padding:2px 8px;border-radius:999px;
 }
-.place-note{font-size:10px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.place-address{
+  font-size:10px;color:rgba(255,255,255,0.28);
+  margin-top:6px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.place-note{
+  font-size:10px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
 .place-url{
   display:inline-block;margin-top:8px;
-  font-size:10px;color:var(--terracotta-light);
-  text-decoration:none;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  max-width:100%;
+  font-size:10px;color:var(--terracotta-light);text-decoration:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
 }
 .place-url:hover{color:var(--terracotta)}
 .place-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .place-tag{
-  font-size:9px;letter-spacing:0.5px;
-  padding:3px 10px;border-radius:999px;
-  background:rgba(216,90,48,0.08);
-  border:1px solid rgba(216,90,48,0.18);
+  font-size:9px;letter-spacing:0.5px;padding:3px 10px;border-radius:999px;
+  background:rgba(216,90,48,0.08);border:1px solid rgba(216,90,48,0.18);
   color:var(--terracotta-light);
+}
+.place-orig-date{
+  font-size:9px;color:rgba(255,255,255,0.2);
+  margin-top:10px;letter-spacing:0.3px;
 }
 
 /* ── card actions ── */
 .place-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;padding-top:2px}
 .action-btn{
   width:28px;height:28px;border-radius:6px;
-  border:1px solid var(--border);
-  background:none;cursor:pointer;
-  font-size:13px;
-  transition:all 0.2s;
+  border:1px solid var(--border);background:none;cursor:pointer;
+  font-size:13px;transition:all 0.2s;
   display:flex;align-items:center;justify-content:center;
   color:rgba(255,255,255,0.25);
 }
 .action-btn:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)}
-.visited-btn.active{border-color:var(--green-border);color:#7dd87f;background:var(--green-bg)}
+.visited-btn.active{border-color:var(--green-border);color:var(--green-text);background:var(--green-bg)}
 .visited-btn.active:hover{background:rgba(75,165,90,0.15)}
 .delete-btn:hover{border-color:rgba(216,90,48,0.4);color:var(--terracotta-light)}
 
-/* ── modal ── */
+/* ── overlays / modals ── */
 .overlay{
   display:none;position:fixed;inset:0;z-index:200;
   background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
@@ -171,8 +178,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 .modal{
   background:#1a1916;
   border:1px solid rgba(255,255,255,0.1);
-  border-radius:16px;
-  padding:36px;
+  border-radius:16px;padding:36px;
   width:100%;max-width:460px;
   max-height:90vh;overflow-y:auto;
 }
@@ -204,8 +210,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   background:none;color:var(--muted);
   font-family:'Montserrat',sans-serif;
   font-size:10px;font-weight:600;letter-spacing:1px;
-  text-transform:uppercase;cursor:pointer;
-  transition:all 0.2s;
+  text-transform:uppercase;cursor:pointer;transition:all 0.2s;
 }
 .modal-cancel:hover{border-color:rgba(255,255,255,0.3);color:var(--warm-white)}
 .modal-save{
@@ -213,11 +218,69 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   background:var(--terracotta);border:none;color:#fff;
   font-family:'Montserrat',sans-serif;
   font-size:10px;font-weight:600;letter-spacing:1px;
-  text-transform:uppercase;cursor:pointer;
-  transition:background 0.2s;
+  text-transform:uppercase;cursor:pointer;transition:background 0.2s;
 }
 .modal-save:hover{background:#C04E28}
 .modal-save:disabled{background:rgba(216,90,48,0.4);cursor:not-allowed}
+
+/* ── import modal specific ── */
+.dropzone{
+  border:1px dashed rgba(255,255,255,0.2);
+  border-radius:12px;padding:40px 24px;
+  text-align:center;cursor:pointer;
+  transition:all 0.2s;margin-bottom:16px;
+}
+.dropzone:hover,.dropzone.drag-over{
+  border-color:rgba(216,90,48,0.5);
+  background:rgba(216,90,48,0.04);
+}
+.dropzone-icon{font-size:28px;margin-bottom:12px;opacity:0.5}
+.dropzone-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;font-weight:300;margin-bottom:6px;
+}
+.dropzone-sub{font-size:10px;color:var(--muted);line-height:1.7}
+.import-hint{
+  font-size:9px;color:rgba(255,255,255,0.2);
+  line-height:1.7;text-align:center;
+}
+.import-error{
+  padding:12px 16px;border-radius:8px;margin-bottom:16px;
+  font-size:11px;line-height:1.6;
+  background:rgba(216,90,48,0.1);
+  border:1px solid rgba(216,90,48,0.25);
+  color:var(--terracotta-light);
+  display:none;
+}
+.import-stats{display:flex;gap:10px;margin-bottom:16px}
+.import-stat{
+  flex:1;padding:14px;border-radius:8px;text-align:center;
+}
+.import-stat-value{
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px;font-weight:300;line-height:1;margin-bottom:4px;
+}
+.import-stat-label{font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.import-stat.ready{background:var(--green-bg);border:1px solid var(--green-border)}
+.import-stat.ready .import-stat-value{color:var(--green-text)}
+.import-stat.skipped{background:rgba(216,90,48,0.06);border:1px solid rgba(216,90,48,0.2)}
+.import-stat.skipped .import-stat-value{color:var(--terracotta-light)}
+.import-list{
+  border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;margin-bottom:4px;max-height:220px;overflow-y:auto;
+}
+.import-row{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.import-row:last-child{border-bottom:none}
+.import-row-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.import-row-meta{font-size:10px;color:var(--muted);flex-shrink:0}
+.import-more{
+  padding:10px 14px;font-size:10px;color:var(--muted);
+  text-align:center;font-style:italic;
+  border-top:1px solid var(--border);
+}
 
 /* ── beta banner ── */
 .beta-banner{
@@ -226,7 +289,6 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   border:1px solid rgba(216,90,48,0.18);
   border-radius:10px;padding:14px 20px;
   margin-bottom:28px;
-  flex-direction:column;gap:6px;
 }
 .beta-banner-text{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6}
 .beta-banner-text strong{color:var(--terracotta-light)}
@@ -237,6 +299,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   .modal{padding:28px 20px}
   .page-title{font-size:34px}
   .nav-profile{display:none}
+  .import-btn span{display:none}
 }
 </style>
 </head>
@@ -255,39 +318,43 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 
   <div class="beta-banner" id="beta-banner">
     <div class="beta-banner-text">
-      <strong>You're a beta user.</strong> More features coming soon — Google Maps import, share from Instagram &amp; TikTok, and Friends Feed.
+      <strong>You're a beta user.</strong> More features coming soon — share from Instagram &amp; TikTok, and Friends Feed.
     </div>
   </div>
 
   <div class="page-header">
     <h1 class="page-title">My Wishlist</h1>
-    <button class="add-btn" onclick="openModal()">+ Save a Place</button>
+    <div class="header-actions">
+      <button class="import-btn" onclick="openImportModal()">↑ <span>Import</span></button>
+      <button class="add-btn" onclick="openModal()">+ Save a Place</button>
+    </div>
   </div>
 
-  <!-- Status filters -->
   <div class="filter-section">
     <div class="filter-row" id="status-filters">
-      <button class="filter-btn active" data-status="all" onclick="setStatus('all', this)">All</button>
-      <button class="filter-btn" data-status="wishlist" onclick="setStatus('wishlist', this)">Wishlist</button>
-      <button class="filter-btn" data-status="visited" onclick="setStatus('visited', this)">Visited</button>
+      <button class="filter-btn active" onclick="setStatus('all', this)">All</button>
+      <button class="filter-btn" onclick="setStatus('wishlist', this)">Wishlist</button>
+      <button class="filter-btn" onclick="setStatus('visited', this)">Visited</button>
     </div>
-    <!-- Category filters -->
     <div class="filter-row" id="category-filters">
-      <button class="filter-btn active" data-cat="all" onclick="setCategory('all', this)">All Types</button>
-      <button class="filter-btn" data-cat="Restaurant" onclick="setCategory('Restaurant', this)">Restaurants</button>
-      <button class="filter-btn" data-cat="Bar" onclick="setCategory('Bar', this)">Bars</button>
-      <button class="filter-btn" data-cat="Spa" onclick="setCategory('Spa', this)">Spas</button>
-      <button class="filter-btn" data-cat="Hotel" onclick="setCategory('Hotel', this)">Hotels</button>
-      <button class="filter-btn" data-cat="Beach" onclick="setCategory('Beach', this)">Beaches</button>
-      <button class="filter-btn" data-cat="Market" onclick="setCategory('Market', this)">Markets</button>
-      <button class="filter-btn" data-cat="Lounge" onclick="setCategory('Lounge', this)">Lounges</button>
-      <button class="filter-btn" data-cat="Other" onclick="setCategory('Other', this)">Other</button>
+      <button class="filter-btn active" onclick="setCategory('all', this)">All Types</button>
+      <button class="filter-btn" onclick="setCategory('Restaurant', this)">Restaurants</button>
+      <button class="filter-btn" onclick="setCategory('Bar', this)">Bars</button>
+      <button class="filter-btn" onclick="setCategory('Spa', this)">Spas</button>
+      <button class="filter-btn" onclick="setCategory('Hotel', this)">Hotels</button>
+      <button class="filter-btn" onclick="setCategory('Beach', this)">Beaches</button>
+      <button class="filter-btn" onclick="setCategory('Market', this)">Markets</button>
+      <button class="filter-btn" onclick="setCategory('Lounge', this)">Lounges</button>
+      <button class="filter-btn" onclick="setCategory('Other', this)">Other</button>
     </div>
   </div>
 
   <div id="places-container"></div>
 
 </main>
+
+<!-- Hidden file input for import -->
+<input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
 
 <!-- Add / Edit Modal -->
 <div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
@@ -298,7 +365,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
       <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard" autocomplete="off"/>
     </div>
     <div class="field">
-      <label>Category *</label>
+      <label>Category <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <select id="place-category">
         <option value="">Select a category</option>
         <option>Restaurant</option>
@@ -312,8 +379,12 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
       </select>
     </div>
     <div class="field">
-      <label>City</label>
+      <label>City <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
       <input type="text" id="place-city" placeholder="e.g. New York, Accra" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Address <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <input type="text" id="place-address" placeholder="e.g. 116 10th Ave, New York, NY 10011" autocomplete="off"/>
     </div>
     <div class="field">
       <label>Link <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
@@ -335,6 +406,51 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   </div>
 </div>
 
+<!-- Import Modal -->
+<div class="overlay" id="import-overlay" onclick="handleImportOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Import from Google Maps</div>
+
+    <div class="import-error" id="import-error"></div>
+
+    <!-- Step 1: drop zone -->
+    <div id="import-step-drop">
+      <div class="dropzone" id="dropzone"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)"
+           onclick="document.getElementById('import-file-input').click()">
+        <div class="dropzone-icon">↑</div>
+        <div class="dropzone-title">Drop your Saved Places.json</div>
+        <p class="dropzone-sub">or click to browse your files</p>
+      </div>
+      <p class="import-hint">
+        Get the file via Google Takeout → select "Maps (your places)" → download &amp; unzip → find <em>Saved Places.json</em>
+      </p>
+    </div>
+
+    <!-- Step 2: preview (hidden until file parsed) -->
+    <div id="import-step-preview" style="display:none">
+      <div class="import-stats">
+        <div class="import-stat ready">
+          <div class="import-stat-value" id="import-ready-count">0</div>
+          <div class="import-stat-label">Ready to import</div>
+        </div>
+        <div class="import-stat skipped" id="import-skipped-stat">
+          <div class="import-stat-value" id="import-skipped-count">0</div>
+          <div class="import-stat-label">Skipped (no name)</div>
+        </div>
+      </div>
+      <div class="import-list" id="import-list"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeImportModal()">Cancel</button>
+      <button class="modal-save" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Places</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const { createClient } = supabase;
 const _supabase = createClient(
@@ -347,6 +463,7 @@ let allPlaces = [];
 let statusFilter = 'all';
 let categoryFilter = 'all';
 let editingId = null;
+let pendingImport = [];
 
 // ── Auth guard ──
 async function init() {
@@ -354,18 +471,14 @@ async function init() {
   if (!session) { window.location.href = 'login.html'; return; }
 
   currentUser = session.user;
-  const email = currentUser.email || '';
-  document.getElementById('nav-profile').textContent = email;
+  document.getElementById('nav-profile').textContent = currentUser.email || '';
 
   const { data: profile } = await _supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', currentUser.id)
-    .single();
+    .from('profiles').select('role').eq('id', currentUser.id).single();
 
   if (profile?.role === 'beta') {
     document.getElementById('beta-badge').style.display = 'block';
-    document.getElementById('beta-banner').style.display = 'flex';
+    document.getElementById('beta-banner').style.display = 'block';
   }
 
   await loadPlaces();
@@ -374,8 +487,7 @@ async function init() {
 // ── Places ──
 async function loadPlaces() {
   const { data, error } = await _supabase
-    .from('places')
-    .select('*')
+    .from('places').select('*')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false });
 
@@ -391,7 +503,6 @@ function renderPlaces() {
   if (categoryFilter !== 'all')    filtered = filtered.filter(p => p.category === categoryFilter);
 
   const container = document.getElementById('places-container');
-
   if (filtered.length === 0) {
     const { title, sub } = emptyMessage();
     container.innerHTML = `
@@ -402,20 +513,20 @@ function renderPlaces() {
       </div>`;
     return;
   }
-
   container.innerHTML = `<div class="places-grid">${filtered.map(placeCard).join('')}</div>`;
 }
 
 function emptyMessage() {
   if (statusFilter === 'visited')
-    return { title: 'No visited places yet', sub: 'Tick the ✓ on any saved place to mark it as visited.' };
+    return { title: 'No visited places yet', sub: 'Tick ✓ on any card to mark it as visited.' };
   if (statusFilter === 'wishlist' && categoryFilter === 'all')
     return { title: 'Wishlist is empty', sub: 'Hit "Save a Place" to start building your wishlist.' };
   if (statusFilter === 'all' && categoryFilter === 'all')
-    return { title: 'Nothing saved yet', sub: 'Hit "Save a Place" to start building your wishlist.' };
+    return { title: 'Nothing saved yet', sub: 'Hit "Save a Place" or import from Google Maps.' };
   return { title: `No ${categoryFilter.toLowerCase()}s found`, sub: 'Try adjusting your filters.' };
 }
 
+// ── Helpers ──
 function parseTags(tags) {
   if (!tags) return [];
   if (Array.isArray(tags)) return tags.filter(Boolean);
@@ -434,6 +545,11 @@ function escHtml(str) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// ── Place card ──
 function placeCard(p) {
   const visited = !!p.visited;
   const tags = parseTags(p.tags);
@@ -449,9 +565,11 @@ function placeCard(p) {
           ${p.city ? `<span class="place-city">📍 ${escHtml(p.city)}</span>` : ''}
           ${visited ? '<span class="visited-badge">Visited</span>' : ''}
         </div>
+        ${p.address ? `<div class="place-address">${escHtml(p.address)}</div>` : ''}
         ${p.note ? `<div class="place-note">${escHtml(p.note)}</div>` : ''}
         ${url ? `<a class="place-url" href="${escHtml(safeUrl(url))}" target="_blank" rel="noopener noreferrer">🔗 ${escHtml(displayUrl)}</a>` : ''}
         ${tags.length ? `<div class="place-tags">${tags.map(t => `<span class="place-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
+        ${p.original_saved_at ? `<div class="place-orig-date">Saved on Google Maps · ${formatDate(p.original_saved_at)}</div>` : ''}
       </div>
       <div class="place-actions">
         <button class="action-btn visited-btn${visited ? ' active' : ''}" onclick="toggleVisited('${p.id}', ${!visited})" title="${visited ? 'Move to wishlist' : 'Mark as visited'}">✓</button>
@@ -464,11 +582,8 @@ function placeCard(p) {
 // ── Filters ──
 function setStatus(status, btn) {
   statusFilter = status;
-  document.querySelectorAll('#status-filters .filter-btn').forEach(b => {
-    b.classList.remove('active', 'visited-active');
-  });
-  if (status === 'visited') btn.classList.add('visited-active');
-  else btn.classList.add('active');
+  document.querySelectorAll('#status-filters .filter-btn').forEach(b => b.classList.remove('active','visited-active'));
+  btn.classList.add(status === 'visited' ? 'visited-active' : 'active');
   renderPlaces();
 }
 
@@ -479,7 +594,7 @@ function setCategory(cat, btn) {
   renderPlaces();
 }
 
-// ── Modal ──
+// ── Add / Edit Modal ──
 function openModal() {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Save a Place';
@@ -498,6 +613,7 @@ function openEditModal(id) {
   document.getElementById('place-name').value = p.name || '';
   document.getElementById('place-category').value = p.category || '';
   document.getElementById('place-city').value = p.city || '';
+  document.getElementById('place-address').value = p.address || '';
   document.getElementById('place-url').value = p.url || '';
   document.getElementById('place-note').value = p.note || '';
   document.getElementById('place-tags').value = parseTags(p.tags).join(', ');
@@ -515,7 +631,7 @@ function closeModal() {
 }
 
 function clearModalFields() {
-  ['place-name','place-city','place-url','place-note','place-tags'].forEach(id => {
+  ['place-name','place-city','place-address','place-url','place-note','place-tags'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('place-category').value = '';
@@ -526,40 +642,48 @@ function handleOverlayClick(e) {
 }
 
 function collectFields() {
-  const name = document.getElementById('place-name').value.trim();
+  const name     = document.getElementById('place-name').value.trim();
   const category = document.getElementById('place-category').value;
-  const city = document.getElementById('place-city').value.trim();
-  const url = document.getElementById('place-url').value.trim();
-  const note = document.getElementById('place-note').value.trim();
-  const tagsRaw = document.getElementById('place-tags').value.trim();
-  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
-  return { name, category, city, url, note, tags };
+  const city     = document.getElementById('place-city').value.trim();
+  const address  = document.getElementById('place-address').value.trim();
+  const url      = document.getElementById('place-url').value.trim();
+  const note     = document.getElementById('place-note').value.trim();
+  const tagsRaw  = document.getElementById('place-tags').value.trim();
+  const tags     = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  return { name, category, city, address, url, note, tags };
 }
 
 async function savePlace() {
-  const { name, category, city, url, note, tags } = collectFields();
+  const fields = collectFields();
   const btn = document.getElementById('save-btn');
-
-  if (!name) { document.getElementById('place-name').focus(); return; }
-  if (!category) { document.getElementById('place-category').focus(); return; }
+  if (!fields.name) { document.getElementById('place-name').focus(); return; }
 
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
   if (editingId) {
-    await updatePlace(editingId, { name, category, city, url, note, tags });
+    await updatePlace(editingId, fields);
   } else {
-    await insertPlace({ name, category, city, url, note, tags });
+    await insertPlace(fields);
   }
+}
+
+function buildRecord(fields) {
+  const r = { name: fields.name };
+  if (fields.category) r.category = fields.category;
+  if (fields.city)     r.city = fields.city;
+  if (fields.address)  r.address = fields.address;
+  if (fields.url)      r.url = fields.url;
+  if (fields.note)     r.note = fields.note;
+  r.tags = fields.tags.length ? fields.tags : null;
+  return r;
 }
 
 async function insertPlace(fields) {
   const btn = document.getElementById('save-btn');
-  const record = { user_id: currentUser.id, ...buildRecord(fields) };
-  const { error } = await _supabase.from('places').insert([record]);
+  const { error } = await _supabase.from('places').insert([{ user_id: currentUser.id, ...buildRecord(fields) }]);
   if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Save Place';
+    btn.disabled = false; btn.textContent = 'Save Place';
     alert('Something went wrong. Please try again.');
     return;
   }
@@ -569,25 +693,14 @@ async function insertPlace(fields) {
 
 async function updatePlace(id, fields) {
   const btn = document.getElementById('save-btn');
-  const record = buildRecord(fields);
-  const { error } = await _supabase.from('places').update(record).eq('id', id).eq('user_id', currentUser.id);
+  const { error } = await _supabase.from('places').update(buildRecord(fields)).eq('id', id).eq('user_id', currentUser.id);
   if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Save Changes';
+    btn.disabled = false; btn.textContent = 'Save Changes';
     alert('Something went wrong. Please try again.');
     return;
   }
   closeModal();
   await loadPlaces();
-}
-
-function buildRecord({ name, category, city, url, note, tags }) {
-  const r = { name, category };
-  if (city)  r.city = city;
-  if (url)   r.url = url;
-  if (note)  r.note = note;
-  r.tags = tags.length ? tags : null;
-  return r;
 }
 
 // ── Visited toggle ──
@@ -605,16 +718,190 @@ async function toggleVisited(id, newState) {
 // ── Delete ──
 async function deletePlace(id) {
   const { error } = await _supabase.from('places').delete().eq('id', id).eq('user_id', currentUser.id);
-  if (!error) {
-    allPlaces = allPlaces.filter(p => p.id !== id);
-    renderPlaces();
-  }
+  if (!error) { allPlaces = allPlaces.filter(p => p.id !== id); renderPlaces(); }
 }
 
 // ── Sign out ──
 async function signOut() {
   await _supabase.auth.signOut();
   window.location.href = '../index.html';
+}
+
+// ── Import Modal ──
+function openImportModal() {
+  resetImportModal();
+  document.getElementById('import-overlay').classList.add('open');
+}
+
+function closeImportModal() {
+  document.getElementById('import-overlay').classList.remove('open');
+  document.getElementById('import-file-input').value = '';
+  pendingImport = [];
+  resetImportModal();
+}
+
+function resetImportModal() {
+  document.getElementById('import-step-drop').style.display = 'block';
+  document.getElementById('import-step-preview').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  document.getElementById('import-error').style.display = 'none';
+  document.getElementById('import-list').innerHTML = '';
+}
+
+function handleImportOverlayClick(e) {
+  if (e.target === document.getElementById('import-overlay')) closeImportModal();
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.add('drag-over');
+}
+
+function handleDragLeave() {
+  document.getElementById('dropzone').classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function showImportError(msg) {
+  const el = document.getElementById('import-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function processFile(file) {
+  document.getElementById('import-error').style.display = 'none';
+
+  if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+    showImportError('Please upload a .json file from Google Maps Takeout.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = evt => {
+    let json;
+    try { json = JSON.parse(evt.target.result); } catch {
+      showImportError('Could not read the file — make sure it\'s a valid JSON file.');
+      return;
+    }
+    if (json.type !== 'FeatureCollection' || !Array.isArray(json.features)) {
+      showImportError('This doesn\'t look like a Google Maps Saved Places file. Expected a FeatureCollection.');
+      return;
+    }
+    const { importable, skipped } = parseGMapsJson(json);
+    pendingImport = importable;
+    showImportPreview(importable, skipped);
+  };
+  reader.readAsText(file);
+}
+
+function extractCity(address) {
+  if (!address) return null;
+  const parts = address.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length >= 3) return parts[parts.length - 3];
+  if (parts.length >= 2) return parts[parts.length - 2];
+  return parts[0] || null;
+}
+
+function parseGMapsJson(json) {
+  const importable = [];
+  const skipped = [];
+
+  for (const feature of json.features) {
+    const props = feature.properties;
+    const loc = props.location;
+
+    if (!loc || !loc.name) {
+      skipped.push(props.google_maps_url);
+      continue;
+    }
+
+    const [lng, lat] = feature.geometry.coordinates;
+    const validCoords = (lng !== 0 || lat !== 0)
+      && Math.abs(lng) <= 180 && Math.abs(lat) <= 90
+      && !(Math.abs(lng) > 128 && lat > 40 && lat < 50); // catch Pacific Ocean outliers
+
+    const address = loc.address || null;
+    const city = extractCity(address);
+
+    importable.push({
+      name:              loc.name,
+      category:          null,
+      city:              city,
+      address:           address,
+      url:               props.google_maps_url || null,
+      lat:               validCoords ? lat : null,
+      lng:               validCoords ? lng : null,
+      original_saved_at: props.date || null,
+      tags:              null,
+      visited:           false,
+    });
+  }
+
+  return { importable, skipped };
+}
+
+function showImportPreview(importable, skipped) {
+  document.getElementById('import-step-drop').style.display = 'none';
+  document.getElementById('import-step-preview').style.display = 'block';
+  document.getElementById('import-ready-count').textContent = importable.length;
+  document.getElementById('import-skipped-count').textContent = skipped.length;
+
+  const MAX_PREVIEW = 8;
+  const preview = importable.slice(0, MAX_PREVIEW);
+  const rest = importable.length - MAX_PREVIEW;
+
+  let html = preview.map(p => `
+    <div class="import-row">
+      <div class="import-row-name">${escHtml(p.name)}</div>
+      <div class="import-row-meta">${p.city ? escHtml(p.city) : ''}${p.original_saved_at ? ' · ' + formatDate(p.original_saved_at) : ''}</div>
+    </div>`).join('');
+
+  if (rest > 0) {
+    html += `<div class="import-more">+${rest} more places</div>`;
+  }
+
+  document.getElementById('import-list').innerHTML = html;
+
+  if (importable.length > 0) {
+    const btn = document.getElementById('import-confirm-btn');
+    btn.textContent = `Import ${importable.length} Place${importable.length !== 1 ? 's' : ''}`;
+    btn.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+async function confirmImport() {
+  const btn = document.getElementById('import-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+
+  const records = pendingImport.map(p => ({ user_id: currentUser.id, ...p }));
+
+  // Batch in chunks of 50
+  const chunkSize = 50;
+  for (let i = 0; i < records.length; i += chunkSize) {
+    const { error } = await _supabase.from('places').insert(records.slice(i, i + chunkSize));
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = `Import ${pendingImport.length} Places`;
+      showImportError('Import failed — please try again.');
+      return;
+    }
+  }
+
+  closeImportModal();
+  await loadPlaces();
 }
 
 init();
