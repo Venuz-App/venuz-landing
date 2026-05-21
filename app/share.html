@@ -191,11 +191,11 @@ body{
   <div id="save-form">
     <span class="shared-label">Shared from another app</span>
     <div class="card-title">Save a Place</div>
-    <p class="card-sub">Fill in the details below and we'll add it to your wishlist.</p>
+    <p class="card-sub" id="card-sub">Detecting place details… <span id="detect-dot" style="color:var(--terracotta)">·</span></p>
 
     <div class="field">
       <label>Place Name *</label>
-      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+      <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard" oninput="this.dataset.edited='1'"/>
     </div>
     <div class="field">
       <label>Category *</label>
@@ -321,18 +321,55 @@ async function init() {
 function showSaveForm(title, text, url) {
   document.getElementById('save-card').style.display = 'block';
 
-  // Pre-fill place name
+  // Basic pre-fill while AI extraction runs
   if (title) {
     document.getElementById('place-name').value = title;
   } else if (text) {
-    // Clean text: truncate at 60 chars
     const cleaned = text.replace(/https?:\/\/\S+/g, '').trim().slice(0, 60);
     if (cleaned) document.getElementById('place-name').value = cleaned;
   }
-
-  // Pre-fill note with URL if present
   if (url) {
     document.getElementById('place-note').value = url;
+  }
+
+  // AI extraction in background — enhances form without blocking
+  extractPlace(title, text, url);
+}
+
+const CATEGORY_MAP = {
+  'Restaurant': 'Restaurant', 'Bar': 'Bar', 'Spa': 'Spa',
+  'Hotel': 'Hotel', 'Beach': 'Beach', 'Market': 'Market',
+  'Lounge': 'Lounge', 'Other': 'Other'
+};
+
+async function extractPlace(title, text, url) {
+  try {
+    const res = await fetch('/api/extract-place', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, text, url })
+    });
+
+    if (!res.ok) throw new Error('API error');
+    const { place } = await res.json();
+
+    if (place) {
+      const nameEl = document.getElementById('place-name');
+      const catEl  = document.getElementById('place-category');
+      const cityEl = document.getElementById('place-city');
+
+      // Only overwrite if field hasn't been edited by user
+      if (place.name && !nameEl.dataset.edited) nameEl.value = place.name;
+      if (place.place_type && !catEl.value) {
+        catEl.value = CATEGORY_MAP[place.place_type] || '';
+      }
+      if (place.city && !cityEl.value) cityEl.value = place.city;
+    }
+  } catch {
+    // Silent fail — user can fill manually
+  } finally {
+    const sub = document.getElementById('card-sub');
+    if (sub) sub.textContent = 'Fill in the details below and we\'ll add it to your wishlist.';
   }
 }
 
