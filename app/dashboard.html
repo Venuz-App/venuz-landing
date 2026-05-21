@@ -229,6 +229,7 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
   border-radius:12px;padding:40px 24px;
   text-align:center;cursor:pointer;
   transition:all 0.2s;margin-bottom:16px;
+  display:block;
 }
 .dropzone:hover,.dropzone.drag-over{
   border-color:rgba(216,90,48,0.5);
@@ -353,8 +354,8 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 
 </main>
 
-<!-- Hidden file input for import -->
-<input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
+<!-- File input for import — must stay outside modals for iOS compatibility -->
+<input type="file" id="import-file-input" accept="application/json,application/geo+json,.json" style="display:none" onchange="handleImportFile(event)">
 
 <!-- Add / Edit Modal -->
 <div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
@@ -415,17 +416,17 @@ main{max-width:720px;margin:0 auto;padding:88px 24px 80px}
 
     <!-- Step 1: drop zone -->
     <div id="import-step-drop">
-      <div class="dropzone" id="dropzone"
-           ondragover="handleDragOver(event)"
-           ondragleave="handleDragLeave(event)"
-           ondrop="handleDrop(event)"
-           onclick="document.getElementById('import-file-input').click()">
+      <!-- label for= wires the tap natively — works on all mobile browsers -->
+      <label for="import-file-input" class="dropzone" id="dropzone"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
         <div class="dropzone-icon">↑</div>
-        <div class="dropzone-title">Drop your Saved Places.json</div>
-        <p class="dropzone-sub">or click to browse your files</p>
-      </div>
+        <div class="dropzone-title">Tap to choose your file</div>
+        <p class="dropzone-sub">Saved Places.json from Google Takeout<br>or drag &amp; drop on desktop</p>
+      </label>
       <p class="import-hint">
-        Get the file via Google Takeout → select "Maps (your places)" → download &amp; unzip → find <em>Saved Places.json</em>
+        Google Maps app → Menu → Your data in Maps → Download your Maps data → unzip → find <em>Saved Places.json</em>
       </p>
     </div>
 
