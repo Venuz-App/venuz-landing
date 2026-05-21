@@ -1114,6 +1114,8 @@ document.getElementById('city-input').addEventListener('keypress', function(e) {
     if (joinBtn) joinBtn.style.display = 'none';
   }
 })();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
 </body>
 </html>
