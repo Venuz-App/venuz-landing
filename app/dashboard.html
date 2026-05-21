@@ -314,6 +314,42 @@ main{
 }
 .import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
 
+/* ── save from link btn ── */
+.link-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;background:none;
+  border:1px solid var(--border);
+  border-radius:999px;color:var(--muted);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+}
+.link-btn:hover{border-color:rgba(255,255,255,0.25);color:var(--warm-white)}
+
+/* ── link modal extras ── */
+.url-row{display:flex;gap:8px;margin-bottom:6px}
+.url-row input{flex:1}
+.extract-btn{
+  padding:12px 16px;border-radius:8px;
+  background:rgba(216,90,48,0.15);
+  border:1px solid rgba(216,90,48,0.3);
+  color:var(--terracotta);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:0.8px;
+  text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;flex-shrink:0;
+}
+.extract-btn:hover{background:rgba(216,90,48,0.25)}
+.extract-btn:disabled{opacity:0.4;cursor:not-allowed}
+.extract-hint{
+  font-size:10px;color:var(--muted);
+  margin-bottom:20px;line-height:1.6;
+}
+.extract-status{
+  font-size:10px;color:var(--terracotta-light);
+  margin-bottom:12px;display:none;
+}
+
 
 @media(max-width:600px){
   nav{padding:0 20px}
@@ -346,6 +382,7 @@ main{
     <h1 class="page-title">My Wishlist</h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <button class="import-btn" id="import-btn" onclick="window.location.href='import.html'">↑ Import Google Maps</button>
+      <button class="link-btn" onclick="openLinkModal()">🔗 Save from Link</button>
       <button class="add-btn" onclick="openModal()">+ Save a Place</button>
     </div>
   </div>
@@ -418,6 +455,52 @@ main{
   </div>
 </div>
 
+
+<!-- Save from Link Modal -->
+<div class="overlay" id="link-overlay" onclick="handleLinkOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Save from Link</div>
+    <p class="extract-hint">Paste a Google Maps, Instagram, or TikTok link and we'll fill in the details automatically.</p>
+    <div class="field">
+      <label>Link</label>
+      <div class="url-row">
+        <input type="url" id="link-url" placeholder="Paste link here…"/>
+        <button class="extract-btn" id="extract-btn" onclick="extractFromLink()">Extract</button>
+      </div>
+    </div>
+    <div class="extract-status" id="extract-status">✦ Detecting place details…</div>
+    <div class="field">
+      <label>Place Name *</label>
+      <input type="text" id="link-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
+    </div>
+    <div class="field">
+      <label>Category *</label>
+      <select id="link-category">
+        <option value="">Select a category</option>
+        <option>Restaurant</option>
+        <option>Bar</option>
+        <option>Spa</option>
+        <option>Hotel</option>
+        <option>Beach</option>
+        <option>Market</option>
+        <option>Lounge</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="link-city" placeholder="e.g. New York, Accra"/>
+    </div>
+    <div class="field">
+      <label>Note <span style="color:rgba(255,255,255,0.2);font-weight:400">(optional)</span></label>
+      <textarea id="link-note" placeholder="Why do you want to go?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeLinkModal()">Cancel</button>
+      <button class="modal-save" id="link-save-btn" onclick="saveLinkPlace()">Save Place</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const { createClient } = supabase;
@@ -658,6 +741,97 @@ async function toggleVisited(id, currentStatus) {
 async function deletePlace(id) {
   const { error } = await _supabase.from('places').delete().eq('id', id).eq('user_id', currentUser.id);
   if (!error) await loadPlaces();
+}
+
+// ── Save from Link ──
+function openLinkModal() {
+  document.getElementById('link-overlay').classList.add('open');
+  document.getElementById('link-url').focus();
+}
+function closeLinkModal() {
+  document.getElementById('link-overlay').classList.remove('open');
+  ['link-url','link-name','link-city','link-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('link-category').value = '';
+  document.getElementById('extract-status').style.display = 'none';
+  document.getElementById('link-save-btn').disabled = false;
+  document.getElementById('link-save-btn').textContent = 'Save Place';
+  document.getElementById('extract-btn').disabled = false;
+  document.getElementById('extract-btn').textContent = 'Extract';
+}
+function handleLinkOverlayClick(e) {
+  if (e.target === document.getElementById('link-overlay')) closeLinkModal();
+}
+
+const LINK_CATEGORY_MAP = {
+  'Restaurant':'Restaurant','Bar':'Bar','Spa':'Spa',
+  'Hotel':'Hotel','Beach':'Beach','Market':'Market',
+  'Lounge':'Lounge','Other':'Other'
+};
+
+async function extractFromLink() {
+  const url = document.getElementById('link-url').value.trim();
+  if (!url) { document.getElementById('link-url').focus(); return; }
+
+  const btn = document.getElementById('extract-btn');
+  const status = document.getElementById('extract-status');
+  btn.disabled = true;
+  btn.textContent = '…';
+  status.style.display = 'block';
+
+  try {
+    const res = await fetch('/api/extract-place', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const { place } = await res.json();
+
+    if (place) {
+      if (place.name) document.getElementById('link-name').value = place.name;
+      if (place.place_type) document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
+      if (place.city) document.getElementById('link-city').value = place.city;
+      // Store URL as note if no note yet
+      if (!document.getElementById('link-note').value) document.getElementById('link-note').value = url;
+      status.textContent = '✦ Details extracted — review and save.';
+    } else {
+      status.textContent = 'Couldn\'t detect a place — fill in the details manually.';
+    }
+  } catch {
+    status.textContent = 'Extraction failed — fill in the details manually.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Extract';
+  }
+}
+
+async function saveLinkPlace() {
+  const name     = document.getElementById('link-name').value.trim();
+  const category = document.getElementById('link-category').value;
+  const city     = document.getElementById('link-city').value.trim();
+  const note     = document.getElementById('link-note').value.trim();
+  const btn      = document.getElementById('link-save-btn');
+
+  if (!name)     { document.getElementById('link-name').focus(); return; }
+  if (!category) { document.getElementById('link-category').focus(); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const record = { user_id: currentUser.id, name, category };
+  if (city) record.city = city;
+  if (note) record.note = note;
+
+  const { error } = await _supabase.from('places').insert([record]);
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Save Place';
+    alert('Something went wrong. Please try again.');
+    return;
+  }
+
+  closeLinkModal();
+  await loadPlaces();
 }
 
 // ── Sign out ──
