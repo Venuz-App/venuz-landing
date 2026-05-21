@@ -437,13 +437,35 @@ function getCookie(name) {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
   return match ? decodeURIComponent(match[2]) : null;
 }
+function setCookie(name, value) {
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+}
 function deleteCookie(name) {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;SameSite=Lax`;
 }
 
 // ── Auth guard ──
 async function init() {
-  // Restore session from cookies if set by auth-callback.html (iOS PWA handoff)
+  // Layer 1 — server-side one-time token via ?pwa_token= in URL
+  const params = new URLSearchParams(window.location.search);
+  const pwaToken = params.get('pwa_token');
+  if (pwaToken) {
+    try {
+      const r = await fetch(`/api/pwa-token?id=${pwaToken}`);
+      if (r.ok) {
+        const { access_token, refresh_token } = await r.json();
+        await _supabase.auth.setSession({ access_token, refresh_token });
+        // Also refresh cookies while we're here
+        setCookie('venuz_at', access_token);
+        setCookie('venuz_rt', refresh_token);
+      }
+    } catch { /* fall through to other methods */ }
+    // Clean the token from the URL
+    window.history.replaceState({}, '', 'dashboard.html');
+  }
+
+  // Layer 2 — cookie session (iOS handoff fallback)
   const at = getCookie('venuz_at');
   const rt = getCookie('venuz_rt');
   if (at && rt) {
