@@ -331,6 +331,35 @@ main{
 }
 .import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
 
+/* ── more dropdown ── */
+.more-wrap{position:relative}
+.more-btn{display:flex;align-items:center;gap:4px}
+.more-dropdown{
+  display:none;position:absolute;
+  top:calc(100% + 6px);left:0;z-index:50;
+  background:#1a1916;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px;padding:6px;
+  min-width:160px;flex-direction:column;gap:2px;
+}
+.more-dropdown.open{display:flex}
+.more-item{
+  width:100%;text-align:left;padding:9px 14px;
+  background:none;border:none;border-radius:7px;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted);
+  cursor:pointer;transition:all 0.15s;
+}
+.more-item:hover,.more-item.active{
+  background:rgba(216,90,48,0.1);color:var(--terracotta);
+}
+.more-btn.active-child{
+  border-color:rgba(216,90,48,0.5);
+  color:var(--terracotta);
+  background:rgba(216,90,48,0.08);
+}
+
 /* ── duplicate warning ── */
 .dup-warning{
   display:none;
@@ -437,15 +466,25 @@ main{
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" onclick="filterBy('all', this)">All</button>
+    <button class="filter-btn active" id="filter-all" onclick="filterBy('all', this)">All</button>
     <button class="filter-btn" onclick="filterBy('Restaurant', this)">Restaurants</button>
     <button class="filter-btn" onclick="filterBy('Bar', this)">Bars</button>
-    <button class="filter-btn" onclick="filterBy('Spa', this)">Spas</button>
+    <button class="filter-btn" onclick="filterBy('Café', this)">Cafés</button>
     <button class="filter-btn" onclick="filterBy('Hotel', this)">Hotels</button>
+    <button class="filter-btn" onclick="filterBy('Spa', this)">Spas</button>
     <button class="filter-btn" onclick="filterBy('Beach', this)">Beaches</button>
-    <button class="filter-btn" onclick="filterBy('Market', this)">Markets</button>
-    <button class="filter-btn" onclick="filterBy('Lounge', this)">Lounges</button>
-    <button class="filter-btn" onclick="filterBy('Other', this)">Other</button>
+    <button class="filter-btn" onclick="filterBy('Shopping', this)">Shopping</button>
+    <div class="more-wrap" id="more-wrap">
+      <button class="filter-btn more-btn" id="more-btn" onclick="toggleMore(event)">More ▾</button>
+      <div class="more-dropdown" id="more-dropdown">
+        <button class="more-item" onclick="filterByMore('Park', 'Parks', event)">Parks</button>
+        <button class="more-item" onclick="filterByMore('Museum', 'Museums', event)">Museums</button>
+        <button class="more-item" onclick="filterByMore('Gallery', 'Galleries', event)">Galleries</button>
+        <button class="more-item" onclick="filterByMore('Entertainment', 'Entertainment', event)">Entertainment</button>
+        <button class="more-item" onclick="filterByMore('Lounge', 'Lounges', event)">Lounges</button>
+        <button class="more-item" onclick="filterByMore('Other', 'Other', event)">Other</button>
+      </div>
+    </div>
   </div>
 
   <div id="places-container">
@@ -473,10 +512,15 @@ main{
         <option value="">Select a category</option>
         <option>Restaurant</option>
         <option>Bar</option>
-        <option>Spa</option>
+        <option>Café</option>
         <option>Hotel</option>
+        <option>Spa</option>
         <option>Beach</option>
-        <option>Market</option>
+        <option>Shopping</option>
+        <option>Park</option>
+        <option>Museum</option>
+        <option>Gallery</option>
+        <option>Entertainment</option>
         <option>Lounge</option>
         <option>Other</option>
       </select>
@@ -535,10 +579,15 @@ main{
         <option value="">Select a category</option>
         <option>Restaurant</option>
         <option>Bar</option>
-        <option>Spa</option>
+        <option>Café</option>
         <option>Hotel</option>
+        <option>Spa</option>
         <option>Beach</option>
-        <option>Market</option>
+        <option>Shopping</option>
+        <option>Park</option>
+        <option>Museum</option>
+        <option>Gallery</option>
+        <option>Entertainment</option>
         <option>Lounge</option>
         <option>Other</option>
       </select>
@@ -592,10 +641,15 @@ main{
         <option value="">Select a category</option>
         <option>Restaurant</option>
         <option>Bar</option>
-        <option>Spa</option>
+        <option>Café</option>
         <option>Hotel</option>
+        <option>Spa</option>
         <option>Beach</option>
-        <option>Market</option>
+        <option>Shopping</option>
+        <option>Park</option>
+        <option>Museum</option>
+        <option>Gallery</option>
+        <option>Entertainment</option>
         <option>Lounge</option>
         <option>Other</option>
       </select>
@@ -835,9 +889,39 @@ function escHtml(str) {
 function filterBy(cat, btn) {
   activeFilter = cat;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.more-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('more-btn').classList.remove('active-child');
+  document.getElementById('more-btn').textContent = 'More ▾';
   btn.classList.add('active');
+  closeMore();
   renderPlaces();
 }
+
+function toggleMore(e) {
+  e.stopPropagation();
+  document.getElementById('more-dropdown').classList.toggle('open');
+}
+
+function filterByMore(cat, label, e) {
+  e.stopPropagation();
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.more-item').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const moreBtn = document.getElementById('more-btn');
+  moreBtn.classList.add('active-child');
+  moreBtn.textContent = label + ' ▾';
+  closeMore();
+  renderPlaces();
+}
+
+function closeMore() {
+  document.getElementById('more-dropdown').classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('more-wrap').contains(e.target)) closeMore();
+});
 
 // ── Duplicate detection ──
 async function checkDuplicate(name) {
@@ -1016,8 +1100,10 @@ function handleLinkOverlayClick(e) {
 }
 
 const LINK_CATEGORY_MAP = {
-  'Restaurant':'Restaurant','Bar':'Bar','Spa':'Spa',
-  'Hotel':'Hotel','Beach':'Beach','Market':'Market',
+  'Restaurant':'Restaurant','Bar':'Bar','Café':'Café',
+  'Hotel':'Hotel','Spa':'Spa','Beach':'Beach',
+  'Shopping':'Shopping','Park':'Park','Museum':'Museum',
+  'Gallery':'Gallery','Entertainment':'Entertainment',
   'Lounge':'Lounge','Other':'Other'
 };
 

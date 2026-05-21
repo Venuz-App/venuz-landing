@@ -149,7 +149,7 @@ if those fields are absent.
 Return ONLY valid JSON:
 {
   "name": "Place name or null",
-  "place_type": "Restaurant|Bar|Spa|Beach|Market|Hotel|Lounge|Other",
+  "place_type": "Restaurant|Bar|Café|Hotel|Spa|Beach|Shopping|Park|Museum|Gallery|Entertainment|Lounge|Other",
   "city": "City name or null",
   "country": "Country or null",
   "address": "Full street address or null",

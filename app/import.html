@@ -555,12 +555,17 @@ function escHtml(str) {
 
 function categorize(name) {
   const n = name.toLowerCase();
-  if (/restaurant|café|cafe|diner|grill|kitchen|bistro|brasserie|trattoria|pizzeria|sushi|ramen|noodle|burger|taco|bbq|steakhouse|eatery|cantina|chophouse|ristorante|osteria/.test(n)) return 'Restaurant';
+  if (/restaurant|diner|grill|kitchen|bistro|brasserie|trattoria|pizzeria|sushi|ramen|noodle|burger|taco|bbq|steakhouse|eatery|cantina|chophouse|ristorante|osteria/.test(n)) return 'Restaurant';
   if (/\bbar\b|pub|brewery|cocktail|speakeasy|distillery|taproom|beerhouse|wine bar/.test(n)) return 'Bar';
+  if (/\bcafé\b|\bcafe\b|coffee|espresso|roaster|patisserie|bakery|boulangerie/.test(n)) return 'Café';
   if (/hotel|inn|resort|motel|lodge|hostel|suites|marriott|hilton|hyatt|westin|sheraton|ritz|four seasons|mandarin|aman/.test(n)) return 'Hotel';
   if (/\bspa\b|salon|massage|wellness|beauty|nail|aesthetics|facial|skincare/.test(n)) return 'Spa';
-  if (/beach|coast|shore|island|bay|cove|lagoon/.test(n)) return 'Beach';
-  if (/market|boutique|gallery|museum/.test(n)) return 'Market';
+  if (/beach|coast|shore|bay|cove|lagoon/.test(n)) return 'Beach';
+  if (/mall|shopping|boutique|store|shop|market|bazaar|outlet/.test(n)) return 'Shopping';
+  if (/\bpark\b|garden|nature|trail|reserve|botanical/.test(n)) return 'Park';
+  if (/museum/.test(n)) return 'Museum';
+  if (/gallery|art\s+space/.test(n)) return 'Gallery';
+  if (/theater|theatre|cinema|concert|arena|stadium|entertainment/.test(n)) return 'Entertainment';
   if (/lounge|nightclub/.test(n)) return 'Lounge';
   return 'Other';
 }
