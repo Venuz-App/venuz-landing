@@ -146,6 +146,23 @@ If "Pre-parsed Google rating", "Pre-parsed price range", or "Pre-parsed hours" f
 use them directly — they are already extracted. Only fall back to parsing the description yourself
 if those fields are absent.
 
+Pick place_type using ONLY these values and definitions:
+- Restaurant — sit-down dining, fast casual, food halls, any place where eating is primary
+- Bar — pubs, breweries, wine bars, cocktail bars (drinking is primary activity)
+- Café — coffee shops, tea houses, bakery-cafes, patisseries, brunch spots
+- Hotel — hotels, resorts, B&Bs, hostels, lodges, vacation rentals
+- Spa — spas, massage studios, wellness centers, nail/beauty salons, bathhouses
+- Beach — beaches, coastal spots, waterfronts, bays, lagoons
+- Shopping — malls, boutiques, markets, outlets, department stores, street markets
+- Park — parks, botanical gardens, nature reserves, hiking trails, green spaces
+- Museum — museums, science centers, history or cultural centers
+- Gallery — art galleries, exhibition spaces, art studios open to public
+- Entertainment — cinemas, theaters, concert halls, bowling, arcades, stadiums, amusement parks
+- Lounge — cocktail lounges, nightclubs, hookah bars, rooftop bars (nightlife-focused)
+- Other — anything that clearly doesn't fit the above
+
+When in doubt between two categories, pick the one that describes the PRIMARY reason someone visits.
+
 Return ONLY valid JSON:
 {
   "name": "Place name or null",

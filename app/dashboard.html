@@ -1099,13 +1099,28 @@ function handleLinkOverlayClick(e) {
   if (e.target === document.getElementById('link-overlay')) closeLinkModal();
 }
 
-const LINK_CATEGORY_MAP = {
-  'Restaurant':'Restaurant','Bar':'Bar','Café':'Café',
-  'Hotel':'Hotel','Spa':'Spa','Beach':'Beach',
-  'Shopping':'Shopping','Park':'Park','Museum':'Museum',
-  'Gallery':'Gallery','Entertainment':'Entertainment',
-  'Lounge':'Lounge','Other':'Other'
-};
+function mapCategory(raw) {
+  if (!raw) return '';
+  const s = raw.toLowerCase().trim();
+  // exact match against known values first
+  const exact = ['Restaurant','Bar','Café','Hotel','Spa','Beach','Shopping','Park','Museum','Gallery','Entertainment','Lounge','Other'];
+  const found = exact.find(c => c.toLowerCase() === s);
+  if (found) return found;
+  // keyword fallback — handles synonyms Claude might return
+  if (/restaurant|diner|dining|eatery|bistro|brasserie|trattoria|sushi|ramen|grill|kitchen/.test(s)) return 'Restaurant';
+  if (/\bcafé\b|\bcafe\b|coffee|espresso|bakery|patisserie|tea house|boulangerie|brunch/.test(s)) return 'Café';
+  if (/\bbar\b|pub|brewery|cocktail|wine bar|speakeasy|taproom|distillery/.test(s)) return 'Bar';
+  if (/hotel|resort|inn|lodge|hostel|motel|bed.and.breakfast|b&b/.test(s)) return 'Hotel';
+  if (/\bspa\b|massage|wellness|salon|beauty|nail|facial|skincare|bathhouse/.test(s)) return 'Spa';
+  if (/beach|coast|shore|bay|cove|lagoon|waterfront/.test(s)) return 'Beach';
+  if (/mall|shopping|boutique|market|outlet|store|shop|bazaar/.test(s)) return 'Shopping';
+  if (/\bpark\b|garden|trail|nature|reserve|botanical|green space/.test(s)) return 'Park';
+  if (/museum/.test(s)) return 'Museum';
+  if (/gallery|art space|exhibition/.test(s)) return 'Gallery';
+  if (/theater|theatre|cinema|concert|arena|stadium|bowling|arcade|amusement|entertainment/.test(s)) return 'Entertainment';
+  if (/lounge|nightclub|hookah|rooftop|night life|nightlife/.test(s)) return 'Lounge';
+  return 'Other';
+}
 
 async function extractFromLink() {
   const url = document.getElementById('link-url').value.trim();
@@ -1127,7 +1142,7 @@ async function extractFromLink() {
 
     if (place) {
       if (place.name)         document.getElementById('link-name').value = place.name;
-      if (place.place_type)   document.getElementById('link-category').value = LINK_CATEGORY_MAP[place.place_type] || '';
+      if (place.place_type)   document.getElementById('link-category').value = mapCategory(place.place_type);
       if (place.city)         document.getElementById('link-city').value = place.city;
       if (place.address)      document.getElementById('link-address').value = place.address;
       if (place.price_range)  document.getElementById('link-price').value = place.price_range;
