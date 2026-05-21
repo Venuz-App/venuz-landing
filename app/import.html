@@ -341,7 +341,7 @@ nav{
   <div class="success-wrap">
     <div class="success-icon">📍</div>
     <h2 class="success-headline" id="success-headline">Places imported!</h2>
-    <p class="success-sub">Your Google Maps saves are now in your VenuZ wishlist.</p>
+    <p class="success-sub" id="success-sub">Your Google Maps saves are now in your VenuZ wishlist.</p>
     <a href="dashboard.html" class="btn-primary" style="display:inline-block;width:auto;padding:16px 40px;">View my wishlist →</a>
   </div>
 </div>
@@ -490,9 +490,32 @@ async function runImport() {
 
   const btn = document.getElementById('import-btn');
   btn.disabled = true;
-  btn.textContent = 'Importing…';
+  btn.textContent = 'Checking for duplicates…';
 
-  const records = allPlaces.map(p => ({
+  // Fetch all existing place names for this user
+  const { data: existing } = await _supabase
+    .from('places')
+    .select('name')
+    .eq('user_id', currentUser.id);
+
+  const existingNames = new Set(
+    (existing || []).map(p => p.name.toLowerCase().trim())
+  );
+
+  // Filter out places the user already has
+  const newPlaces = allPlaces.filter(p => !existingNames.has(p.name.toLowerCase().trim()));
+  const skippedCount = allPlaces.length - newPlaces.length;
+
+  if (newPlaces.length === 0) {
+    btn.disabled = false;
+    btn.textContent = `Import ${allPlaces.length} place${allPlaces.length !== 1 ? 's' : ''} →`;
+    showError(`All ${allPlaces.length} place${allPlaces.length !== 1 ? 's are' : ' is'} already in your wishlist — nothing new to import.`);
+    return;
+  }
+
+  btn.textContent = `Importing ${newPlaces.length} places…`;
+
+  const records = newPlaces.map(p => ({
     user_id: currentUser.id,
     name: p.name,
     category: p.category || null,
@@ -510,14 +533,18 @@ async function runImport() {
     const { error } = await _supabase.from('places').insert(records.slice(i, i + chunkSize));
     if (error) {
       btn.disabled = false;
-      btn.textContent = `Import ${allPlaces.length} place${allPlaces.length !== 1 ? 's' : ''} →`;
+      btn.textContent = `Import ${newPlaces.length} place${newPlaces.length !== 1 ? 's' : ''} →`;
       showError('Something went wrong during the import. Please try again.');
       goTo(3);
       return;
     }
   }
 
-  document.getElementById('success-headline').textContent = `${allPlaces.length} place${allPlaces.length !== 1 ? 's' : ''} imported!`;
+  document.getElementById('success-headline').textContent =
+    `${newPlaces.length} place${newPlaces.length !== 1 ? 's' : ''} imported!`;
+  document.getElementById('success-sub').textContent = skippedCount > 0
+    ? `${skippedCount} place${skippedCount !== 1 ? 's were' : ' was'} already in your wishlist and skipped.`
+    : 'Your Google Maps saves are now in your VenuZ wishlist.';
   goTo(5);
 }
 

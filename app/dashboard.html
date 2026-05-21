@@ -331,6 +331,20 @@ main{
 }
 .import-btn:hover{background:rgba(216,90,48,0.08);border-color:var(--terracotta)}
 
+/* ── duplicate warning ── */
+.dup-warning{
+  display:none;
+  padding:12px 14px;border-radius:8px;
+  background:rgba(216,90,48,0.08);
+  border:1px solid rgba(216,90,48,0.25);
+  font-size:11px;color:var(--terracotta-light);
+  line-height:1.6;margin-bottom:16px;
+}
+.dup-warning a{
+  color:var(--terracotta);text-decoration:underline;
+  cursor:pointer;font-weight:600;
+}
+
 /* ── star rating ── */
 .star-picker{display:flex;gap:10px;margin:4px 0 8px}
 .star{font-size:32px;cursor:pointer;color:rgba(255,255,255,0.15);transition:color 0.15s;line-height:1;user-select:none}
@@ -448,6 +462,7 @@ main{
 <div class="overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
   <div class="modal">
     <div class="modal-title">Save a Place</div>
+    <div class="dup-warning" id="dup-warning-add"></div>
     <div class="field">
       <label>Place Name *</label>
       <input type="text" id="place-name" placeholder="e.g. Carbone, Nobu, The Standard"/>
@@ -500,6 +515,7 @@ main{
 <div class="overlay" id="link-overlay" onclick="handleLinkOverlayClick(event)">
   <div class="modal">
     <div class="modal-title">Save from Link</div>
+    <div class="dup-warning" id="dup-warning-link"></div>
     <p class="extract-hint">Paste a Google Maps, Instagram, or TikTok link and we'll fill in the details automatically.</p>
     <div class="field">
       <label>Link</label>
@@ -823,6 +839,17 @@ function filterBy(cat, btn) {
   renderPlaces();
 }
 
+// ── Duplicate detection ──
+async function checkDuplicate(name) {
+  const { data } = await _supabase
+    .from('places')
+    .select('id, name')
+    .eq('user_id', currentUser.id)
+    .ilike('name', name.trim())
+    .limit(1);
+  return data && data.length > 0 ? data[0] : null;
+}
+
 // ── Save place ──
 function openModal() {
   document.getElementById('modal-overlay').classList.add('open');
@@ -835,23 +862,37 @@ function closeModal() {
   document.getElementById('place-price').value = '';
   document.getElementById('save-btn').disabled = false;
   document.getElementById('save-btn').textContent = 'Save Place';
+  document.getElementById('dup-warning-add').style.display = 'none';
 }
 function handleOverlayClick(e) {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 }
 
-async function savePlace() {
+async function savePlace(force = false) {
   const name = document.getElementById('place-name').value.trim();
   const category = document.getElementById('place-category').value;
   const city = document.getElementById('place-city').value.trim();
   const note = document.getElementById('place-note').value.trim();
   const btn = document.getElementById('save-btn');
+  const dupEl = document.getElementById('dup-warning-add');
 
   if (!name) { document.getElementById('place-name').focus(); return; }
   if (!category) { document.getElementById('place-category').focus(); return; }
 
+  dupEl.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Saving…';
+
+  if (!force) {
+    const dup = await checkDuplicate(name);
+    if (dup) {
+      dupEl.innerHTML = `<strong>${escHtml(dup.name)}</strong> is already in your wishlist. <a onclick="savePlace(true)">Save anyway</a>`;
+      dupEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Save Place';
+      return;
+    }
+  }
 
   const price   = document.getElementById('place-price').value;
   const address = document.getElementById('place-address').value.trim();
@@ -964,6 +1005,7 @@ function closeLinkModal() {
   document.getElementById('link-category').value = '';
   document.getElementById('link-grating').value = '';
   document.getElementById('extract-status').style.display = 'none';
+  document.getElementById('dup-warning-link').style.display = 'none';
   document.getElementById('link-save-btn').disabled = false;
   document.getElementById('link-save-btn').textContent = 'Save Place';
   document.getElementById('extract-btn').disabled = false;
@@ -1018,18 +1060,31 @@ async function extractFromLink() {
   }
 }
 
-async function saveLinkPlace() {
+async function saveLinkPlace(force = false) {
   const name     = document.getElementById('link-name').value.trim();
   const category = document.getElementById('link-category').value;
   const city     = document.getElementById('link-city').value.trim();
   const note     = document.getElementById('link-note').value.trim();
   const btn      = document.getElementById('link-save-btn');
+  const dupEl    = document.getElementById('dup-warning-link');
 
   if (!name)     { document.getElementById('link-name').focus(); return; }
   if (!category) { document.getElementById('link-category').focus(); return; }
 
+  dupEl.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Saving…';
+
+  if (!force) {
+    const dup = await checkDuplicate(name);
+    if (dup) {
+      dupEl.innerHTML = `<strong>${escHtml(dup.name)}</strong> is already in your wishlist. <a onclick="saveLinkPlace(true)">Save anyway</a>`;
+      dupEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Save Place';
+      return;
+    }
+  }
 
   const price   = document.getElementById('link-price').value;
   const hours   = document.getElementById('link-hours').value.trim();
