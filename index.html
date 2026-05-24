@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VenuZ — Every place worth going, saved.</title>
-<meta name="description" content="VenuZ is the app for saving and discovering places worth going. Restaurants, bars, spas, beaches, markets, hotels, lounges — and anywhere else life takes you.">
-<meta property="og:title" content="VenuZ — Every place worth going, saved.">
-<meta property="og:description" content="Stop losing places in your DMs. VenuZ is your organized, vibe-tagged wishlist for everywhere worth going.">
+<title>VenuZ — Every place worth going, saved. | NYC</title>
+<meta name="description" content="Stop losing places in your DMs. VenuZ is your organized, vibe-tagged wishlist for every restaurant, bar, spa, beach, hookah lounge and more.">
+<meta property="og:title" content="VenuZ — Every place worth going, saved. | NYC">
+<meta property="og:description" content="Stop losing places in your DMs. VenuZ is your organized, vibe-tagged wishlist for every restaurant, bar, spa, beach, hookah lounge and more.">
 <meta property="og:url" content="https://venuzapp.com">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="VenuZ">
@@ -15,8 +15,8 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@VenuzApp">
-<meta name="twitter:title" content="VenuZ — Every place worth going, saved.">
-<meta name="twitter:description" content="Stop losing places in your DMs. VenuZ is your organized, vibe-tagged wishlist for everywhere worth going.">
+<meta name="twitter:title" content="VenuZ — Every place worth going, saved. | NYC">
+<meta name="twitter:description" content="Stop losing places in your DMs. VenuZ is your organized, vibe-tagged wishlist for every restaurant, bar, spa, beach, hookah lounge and more.">
 <meta name="twitter:image" content="https://venuzapp.com/assets/og-image.png">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -82,6 +82,7 @@ nav{
   font-size:10px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;color:rgba(255,255,255,0.5);
   text-decoration:none;transition:color 0.2s;
+  display:none;
 }
 .nav-signin:hover{color:var(--warm-white)}
 
@@ -580,7 +581,8 @@ nav{
 .pricing-annual{font-size:9px;color:var(--muted);margin-bottom:20px}
 .pricing-divider{height:1px;background:rgba(255,255,255,0.08);margin-bottom:20px}
 .pricing-features{list-style:none;display:flex;flex-direction:column;gap:9px}
-.pricing-features li{font-size:10px;color:rgba(255,255,255,0.55);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.pricing-features li{font-size:10px;color:rgba(255,255,255,0.55);display:flex;align-items:center;gap:8px;line-height:1.5}
+.coming-soon{font-size:8px;font-weight:500;letter-spacing:0.5px;color:var(--muted);opacity:0.75;white-space:nowrap;flex-shrink:0}
 .pricing-features li::before{content:'→';color:var(--terracotta);flex-shrink:0}
 
 /* ─── CITY REQUEST ─── */
@@ -678,9 +680,9 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
     <div class="pill">🥩 Don Angie · West Village</div>
     <div class="pill">🍹 Employees Only · NYC</div>
     <div class="pill">🧖 Great Jones Spa · NoHo</div>
-    <div class="pill">🌅 Rooftop bar · Accra</div>
+    <div class="pill">🌅 Westlight · Williamsburg</div>
     <div class="pill">☕ Devoción · Williamsburg</div>
-    <div class="pill">🎭 Labadi Beach · Ghana</div>
+    <div class="pill">💆 Aire Ancient Baths · Tribeca</div>
     <div class="pill">💎 Hidden gem · Brooklyn</div>
     <div class="pill">🥂 Date night · Manhattan</div>
   </div>
@@ -705,7 +707,6 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
 
   <div class="cities">
     <div class="city-badge active">📍 New York City</div>
-    <div class="city-badge active">📍 Accra, Ghana</div>
   </div>
 </section>
 
@@ -984,8 +985,8 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
         <ul class="pricing-features">
           <li>Everything in Free</li>
           <li>Import from Google Maps</li>
-          <li>Import from Instagram saves</li>
-          <li>Import from TikTok bookmarks</li>
+          <li>Import from Instagram saves <span class="coming-soon">· coming soon</span></li>
+          <li>Import from TikTok bookmarks <span class="coming-soon">· coming soon</span></li>
           <li>Unlimited saved places</li>
         </ul>
       </div>
@@ -998,7 +999,7 @@ footer{padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);display:fle
           <li>Everything in Pro</li>
           <li>Plan a Night Out — group voting</li>
           <li>Shared wishlists</li>
-          <li>AI place recommendations</li>
+          <li>AI place recommendations <span class="coming-soon">· coming soon</span></li>
           <li>Priority access to new features</li>
         </ul>
       </div>
@@ -1110,6 +1111,7 @@ document.getElementById('city-input').addEventListener('keypress', function(e) {
       signinLink.textContent = 'Open App →';
       signinLink.href = '/app/dashboard.html';
       signinLink.style.color = 'var(--terracotta)';
+      signinLink.style.display = 'inline';
     }
     if (joinBtn) joinBtn.style.display = 'none';
   }
