@@ -2,6 +2,11 @@
 .DS_Store
 .claude/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # Local docs (not for public repo)
 *.md
 !README.md
